@@ -1,0 +1,27 @@
+---
+- name: Atualiza cache do apt
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Instala utilitarios de diagnostico e auditoria
+  ansible.builtin.apt:
+    name:
+      - dnsutils      # dig
+      - iputils-ping  # ping
+      - curl
+      - nmap
+      - rsyslog
+    state: present
+
+- name: Garante resolucao de nomes interna via /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: "^{{ item.ip }}\\s"
+    line: "{{ item.ip }} {{ item.nome }}"
+    state: present
+  loop:
+    - { ip: "192.168.56.10", nome: "bastion" }
+    - { ip: "192.168.56.11", nome: "web1" }
+    - { ip: "192.168.56.12", nome: "web2" }
+    - { ip: "192.168.56.13", nome: "db" }

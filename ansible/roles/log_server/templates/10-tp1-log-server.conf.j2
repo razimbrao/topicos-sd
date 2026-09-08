@@ -1,0 +1,14 @@
+# Gerenciado pelo Ansible - centralizador de logs do TP1
+
+module(load="imudp")
+input(type="imudp" port="514")
+
+module(load="imtcp")
+input(type="imtcp" port="514")
+
+# Um arquivo por host de origem, dentro do volume persistente.
+template(name="ArquivoPorHost" type="string"
+         string="{{ dir_persistente }}/logs/%HOSTNAME%.log")
+
+# omfile em modo append: os registros anteriores ao destroy sao preservados.
+*.* action(type="omfile" dynaFile="ArquivoPorHost" fileCreateMode="0666" dirCreateMode="0777")

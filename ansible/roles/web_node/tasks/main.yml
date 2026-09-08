@@ -1,0 +1,30 @@
+---
+- name: Instala o Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Publica a pagina identificando o no que respondeu
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: "0644"
+
+- name: Expoe o hostname do no no cabecalho da resposta
+  ansible.builtin.copy:
+    dest: /etc/nginx/conf.d/no-identidade.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Gerenciado pelo Ansible
+      add_header X-No-Aplicacao "{{ inventory_hostname }}" always;
+  notify: Recarrega nginx
+
+- name: Garante o Nginx ativo e habilitado no boot
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

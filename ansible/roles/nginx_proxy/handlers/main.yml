@@ -1,0 +1,5 @@
+---
+- name: Recarrega nginx proxy
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded

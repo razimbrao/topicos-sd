@@ -1,0 +1,74 @@
+---
+# Fonte da Verdade: os logs vivem no synced_folder, no host fisico.
+# A VM e "gado" e pode ser destruida; o estado sobrevive.
+
+- name: Verifica se o diretorio persistente esta montado do host
+  ansible.builtin.command: findmnt --noheadings --target {{ dir_persistente }} -o SOURCE,FSTYPE
+  register: montagem_persistente
+  changed_when: false
+
+- name: Falha cedo se o synced_folder nao estiver montado
+  ansible.builtin.assert:
+    that: "'vboxsf' in montagem_persistente.stdout"
+    fail_msg: >-
+      {{ dir_persistente }} nao esta montado via VirtualBox shared folder.
+      Sem isso os logs NAO sobreviveriam ao 'vagrant destroy'. Rode 'vagrant reload db'.
+
+- name: Cria o subdiretorio de logs no volume persistente
+  ansible.builtin.file:
+    path: "{{ dir_persistente }}/logs"
+    state: directory
+    mode: "0777"
+
+- name: Configura o rsyslog como centralizador de logs da rede
+  ansible.builtin.template:
+    src: 10-tp1-log-server.conf.j2
+    dest: /etc/rsyslog.d/10-tp1-log-server.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reinicia rsyslog
+
+- name: Instala o gerador de estado continuo (prova do survival test)
+  ansible.builtin.copy:
+    dest: /usr/local/bin/gerador-estado.sh
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # Gera registros continuos para comprovar a continuidade dos logs
+      # antes e depois de um 'vagrant destroy -f db'.
+      while true; do
+        logger -t tp1-estado "registro persistente gerado em $(date --iso-8601=seconds) por $(hostname)"
+        sleep 5
+      done
+
+- name: Cria o servico systemd do gerador de estado
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/tp1-estado.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Gerador continuo de estado para o teste de sobrevivencia (TP1)
+      After=rsyslog.service
+      Requires=rsyslog.service
+
+      [Service]
+      ExecStart=/usr/local/bin/gerador-estado.sh
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: Recarrega systemd
+
+- name: Aplica alteracoes pendentes de unidades systemd
+  ansible.builtin.meta: flush_handlers
+
+- name: Garante o gerador de estado ativo e habilitado no boot
+  ansible.builtin.service:
+    name: tp1-estado
+    state: started
+    enabled: true

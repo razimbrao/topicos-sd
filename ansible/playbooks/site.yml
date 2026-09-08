@@ -1,0 +1,32 @@
+---
+# Playbook mestre. Idempotente: pode ser reexecutado quantas vezes for necessario.
+# Ordem importa: o servidor de logs (db) sobe antes dos clientes que enviam para ele.
+
+- name: Base comum a todos os nos
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Servidor de persistencia de logs
+  hosts: db
+  become: true
+  roles:
+    - log_server
+    - hardening
+
+- name: Nos de aplicacao
+  hosts: web
+  become: true
+  roles:
+    - web_node
+    - log_client
+    - hardening
+
+- name: Ponto unico de entrada (proxy reverso)
+  hosts: bastion
+  become: true
+  roles:
+    - nginx_proxy
+    - log_client
+    - hardening

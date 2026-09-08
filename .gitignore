@@ -1,0 +1,11 @@
+# Estado local do Vagrant (contem chaves privadas - NUNCA versionar)
+.vagrant/
+*.log
+ubuntu-*-console.log
+
+# Dados persistentes gerados em runtime: o diretorio e versionado, o conteudo nao.
+data/dados_persistentes/*
+!data/dados_persistentes/.gitkeep
+
+# Ansible
+*.retry

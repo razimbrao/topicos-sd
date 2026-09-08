@@ -1,0 +1,24 @@
+---
+# bastion, web1 e web2 enviam seus logs para o db, que os grava no volume persistente.
+
+- name: Encaminha os logs locais para o centralizador
+  ansible.builtin.copy:
+    dest: /etc/rsyslog.d/20-tp1-log-client.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Gerenciado pelo Ansible
+      # @@ = TCP (entrega confiavel). Fila em disco evita perda se o db estiver fora.
+      $ActionQueueType LinkedList
+      $ActionQueueFileName tp1fwd
+      $ActionResumeRetryCount -1
+      $ActionQueueSaveOnShutdown on
+      *.* @@{{ db_host }}:514
+  notify: Reinicia rsyslog cliente
+
+- name: Garante o rsyslog ativo e habilitado no boot
+  ansible.builtin.service:
+    name: rsyslog
+    state: started
+    enabled: true

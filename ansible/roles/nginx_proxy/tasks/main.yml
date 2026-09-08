@@ -1,0 +1,36 @@
+---
+# Transparencia de acesso (Tanenbaum): o cliente enxerga apenas o bastion,
+# nunca a topologia interna web1/web2.
+
+- name: Instala o Nginx no bastion
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Remove o site default para o proxy assumir a porta 80
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Recarrega nginx proxy
+
+- name: Configura o proxy reverso com balanceamento entre web1 e web2
+  ansible.builtin.template:
+    src: proxy.conf.j2
+    dest: /etc/nginx/sites-available/tp1-proxy.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Recarrega nginx proxy
+
+- name: Habilita o site do proxy
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/tp1-proxy.conf
+    dest: /etc/nginx/sites-enabled/tp1-proxy.conf
+    state: link
+  notify: Recarrega nginx proxy
+
+- name: Garante o Nginx ativo e habilitado no boot
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

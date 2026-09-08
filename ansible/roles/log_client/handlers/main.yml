@@ -1,0 +1,5 @@
+---
+- name: Reinicia rsyslog cliente
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted

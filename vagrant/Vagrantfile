@@ -1,0 +1,74 @@
+# TP1 - Topicos em Redes e Processamento Distribuido I
+# Topologia: bastion (proxy reverso + no de controle Ansible), web1, web2, db (rsyslog persistente)
+#
+# ATENCAO: a VM "bastion" e definida por ultimo de proposito.
+# Ela e o no de controle do Ansible e precisa que web1/web2/db ja existam
+# (para que suas chaves privadas estejam em ./.vagrant/machines) antes de provisionar.
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "512"
+    vb.cpus = 2
+  end
+
+  # VM: web1 - no de processamento de aplicacao
+  config.vm.define "web1" do |web1|
+    web1.vm.hostname = "web1"
+    web1.vm.network "private_network", ip: "192.168.56.11"
+  end
+
+  # VM: web2 - no secundario para redundancia/balanceamento
+  config.vm.define "web2" do |web2|
+    web2.vm.hostname = "web2"
+    web2.vm.network "private_network", ip: "192.168.56.12"
+  end
+
+  # VM: db - servidor de persistencia (centralizador de logs rsyslog)
+  config.vm.define "db" do |db|
+    db.vm.hostname = "db"
+    db.vm.network "private_network", ip: "192.168.56.13"
+
+    # PERSISTENCIA: o estado vive no host fisico, nao na VM.
+    # dmode/fmode sao necessarios porque o vboxsf ignora chown/chmod dentro da VM
+    # e o rsyslogd (usuario syslog) precisa escrever neste diretorio.
+    db.vm.synced_folder "../data/dados_persistentes", "/var/lib/dados_persistentes",
+      create: true,
+      mount_options: ["dmode=777", "fmode=666"]
+  end
+
+  # VM: bastion - ponto unico de entrada + no de controle do Ansible
+  config.vm.define "bastion", primary: true do |b|
+    b.vm.hostname = "bastion"
+    b.vm.network "private_network", ip: "192.168.56.10"
+
+    # Chaves privadas geradas pelo Vagrant para as demais VMs
+    b.vm.synced_folder "./.vagrant/machines", "/home/vagrant/machines", disabled: false
+    # Codigo Ansible versionado no repositorio
+    b.vm.synced_folder "../ansible", "/ansible"
+
+    b.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+    end
+
+    b.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y software-properties-common
+      add-apt-repository --yes --update ppa:ansible/ansible
+      apt-get install -y ansible
+
+      # O SSH exige permissao 600 em chaves privadas
+      chmod 600 /home/vagrant/machines/*/virtualbox/private_key
+      chown vagrant:vagrant /home/vagrant/machines/*/virtualbox/private_key
+    SHELL
+
+    b.vm.provision "ansible_local" do |ansible|
+      ansible.install           = false
+      ansible.provisioning_path = "/ansible"
+      ansible.inventory_path    = "inventory.ini"
+      ansible.playbook          = "playbooks/site.yml"
+      ansible.limit             = "all"
+    end
+  end
+end
