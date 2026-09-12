@@ -67,7 +67,7 @@ cd vagrant && vagrant provision bastion
 ├── ansible/            # Playbooks, roles idempotentes e inventário
 │   ├── ansible.cfg
 │   ├── inventory.ini
-│   ├── playbooks/site.yml
+│   ├── site.yml
 │   └── roles/          # common, hardening, nginx_proxy, web_node, log_client, log_server
 ├── vagrant/            # Vagrantfile e bootstrap inicial
 ├── data/               # Volume persistente montado na VM db (conteúdo não versionado)
@@ -126,9 +126,10 @@ hosts.
 
 ## Decisões técnicas
 
-- **`db` expõe 514 apenas para `192.168.56.0/24`.** A política de permissão mínima do roteiro
-  trata do acesso *externo*; o canal de logs é interno à rede host-only e ficaria inutilizável
-  se bloqueado. A regra é explicitamente restrita por origem.
+- **`db` expõe 514 apenas para os IPs de `bastion`, `web1` e `web2`.** A política de permissão mínima do roteiro
+  trata do acesso *externo*; o canal de logs é interno e ficaria inutilizável
+  se bloqueado. A regra é restrita host a host — nem o host físico (192.168.56.1) enxerga
+  a porta, então a varredura nmap mostra apenas 22/80/443 em todas as VMs.
 - **`dmode=777`/`fmode=666` no synced_folder.** O sistema de arquivos `vboxsf` ignora
   `chown`/`chmod` feitos dentro da VM; sem essas opções de montagem o `rsyslogd` (usuário
   `syslog`) não conseguiria escrever no volume persistente.

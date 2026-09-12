@@ -44,12 +44,27 @@
     - "80"
     - "443"
 
-- name: Libera o rsyslog apenas para a rede interna (somente no db)
+# Permissao minima levada a serio: a 514 e liberada apenas para os tres nos que
+# de fato enviam logs, e nao para a sub-rede inteira. Assim o host fisico
+# (192.168.56.1) tambem enxerga a porta como filtrada na auditoria com nmap.
+- name: Libera o rsyslog apenas para os nos clientes (somente no db)
+  community.general.ufw:
+    rule: allow
+    port: "514"
+    proto: "{{ item.0 }}"
+    src: "{{ item.1 }}"
+  loop: "{{ ['tcp', 'udp'] | product([bastion_ip, web1_ip, web2_ip]) | list }}"
+  when: "'db' in group_names"
+
+# O UFW nao remove sozinho uma regra que deixou de ser declarada: a versao
+# anterior liberava a 514 para toda a 192.168.56.0/24 e precisa ser revogada.
+- name: Revoga a regra antiga da 514 aberta para a sub-rede inteira
   community.general.ufw:
     rule: allow
     port: "514"
     proto: "{{ item }}"
-    src: "{{ rede_interna }}"
+    src: 192.168.56.0/24
+    delete: true
   loop:
     - tcp
     - udp

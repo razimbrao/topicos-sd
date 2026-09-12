@@ -8,6 +8,10 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/jammy64"
 
+  # O host executa o VirtualBox sob o hypervisor da Microsoft (Hyper-V ativo),
+  # o que torna o boot das VMs bem mais lento que o padrao de 300s do Vagrant.
+  config.vm.boot_timeout = 900
+
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "512"
     vb.cpus = 2
@@ -58,16 +62,28 @@ Vagrant.configure("2") do |config|
       add-apt-repository --yes --update ppa:ansible/ansible
       apt-get install -y ansible
 
-      # O SSH exige permissao 600 em chaves privadas
-      chmod 600 /home/vagrant/machines/*/virtualbox/private_key
-      chown vagrant:vagrant /home/vagrant/machines/*/virtualbox/private_key
+      # O SSH exige permissao 600 em chaves privadas, mas /home/vagrant/machines
+      # e um shared folder vboxsf, que ignora chmod. Por isso as chaves sao
+      # COPIADAS para o disco real da VM, onde a permissao de fato se aplica.
+      install -d -m 700 -o vagrant -g vagrant /home/vagrant/keys
+      for maquina in web1 web2 db; do
+        chave=/home/vagrant/machines/$maquina/virtualbox/private_key
+        if [ -f "$chave" ]; then
+          install -m 600 -o vagrant -g vagrant "$chave" /home/vagrant/keys/$maquina
+        fi
+      done
     SHELL
 
     b.vm.provision "ansible_local" do |ansible|
       ansible.install           = false
+      # O playbook fica ao lado de roles/ de proposito: o /ansible e um shared
+      # folder world-writable, e o Ansible se recusa a ler ansible.cfg desses
+      # diretorios. Sem o cfg, o roles_path padrao passa a ser <dir do playbook>/roles.
+      # O config_file abaixo e passado via ANSIBLE_CONFIG, que nao sofre a mesma restricao.
       ansible.provisioning_path = "/ansible"
+      ansible.config_file       = "/ansible/ansible.cfg"
       ansible.inventory_path    = "inventory.ini"
-      ansible.playbook          = "playbooks/site.yml"
+      ansible.playbook          = "site.yml"
       ansible.limit             = "all"
     end
   end
