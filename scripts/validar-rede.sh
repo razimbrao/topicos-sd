@@ -1,6 +1,6 @@
 #!/bin/bash
 # Validacao analitica da secao 3 do roteiro: NAT (saida externa) + resolucao de nomes.
-# Executar DENTRO de cada VM:  vagrant ssh <vm> -c "bash /vagrant/../scripts/validar-rede.sh"
+# Executar DENTRO de cada VM:  vagrant ssh <vm> -c "bash /scripts/validar-rede.sh"
 set -u
 
 echo "=== Validacao de rede em $(hostname) ==="

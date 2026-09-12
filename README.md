@@ -81,7 +81,7 @@ cd vagrant && vagrant provision bastion
 ### 1. Rede (NAT + DNS + host-only)
 
 ```bash
-cd vagrant && vagrant ssh web1 -c "bash /vagrant/../scripts/validar-rede.sh"
+cd vagrant && vagrant ssh web1 -c "bash /scripts/validar-rede.sh"
 ```
 
 ### 2. Proxy reverso e balanceamento

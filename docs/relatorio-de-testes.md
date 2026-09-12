@@ -19,7 +19,28 @@ Configuração final do host:
 ## 1. Provisionamento e rede
 
 `vagrant up --provision` cria as 4 VMs, cada uma com NAT (adapter 1) e host-only
-(adapter 2). Saída externa e DNS validados via `scripts/validar-rede.sh`.
+(adapter 2). Saída de `bash /scripts/validar-rede.sh` executado na `web1`:
+
+```
+--- Interfaces (esperado: NAT + host-only) ---
+enp0s3   UP   10.0.2.15/24          <- NAT
+enp0s8   UP   192.168.56.11/24      <- host-only
+
+--- Conectividade externa (NAT) ---
+3 packets transmitted, 3 received, 0% packet loss
+rtt min/avg/max/mdev = 7.405/8.480/9.957/1.079 ms
+[OK] saida para a internet
+
+--- Resolucao de nomes (DNS) ---
+172.217.29.206
+[OK] DNS resolvendo
+
+--- Conectividade interna host-only ---
+[OK] 192.168.56.10 alcancavel
+[OK] 192.168.56.11 alcancavel
+[OK] 192.168.56.12 alcancavel
+[OK] 192.168.56.13 alcancavel
+```
 
 ```
 PLAY RECAP
