@@ -1,0 +1,42 @@
+# TP1 - Setup separado: estacao Linux de validacao
+# Uma VM Ubuntu extra, fora do Vagrantfile principal, que se liga a mesma rede
+# host-only (192.168.56.0/24) e roda os scripts de validacao em ambiente Linux.
+#
+# Uso (com o cluster de ../vagrant ja no ar):
+#   cd vagrant-linux && vagrant up
+#   vagrant ssh -c "bash /projeto/scripts/auditar-seguranca.sh"
+#
+# Ela NAO faz parte do inventario Ansible: nao recebe hardening nem firewall,
+# assim a auditoria enxerga o cluster de fora, como um cliente qualquer da rede.
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+
+  # Mesmo motivo do Vagrantfile principal: VirtualBox sob Hyper-V e lento no boot.
+  config.vm.boot_timeout = 900
+
+  config.vm.define "linux" do |l|
+    l.vm.hostname = "linux"
+    # .30 fica fora da faixa dos nos do cluster (.10-.20) e fora das regras da 514.
+    l.vm.network "private_network", ip: "192.168.56.30"
+
+    # Porta SSH fixa no host. Sem isso o auto_correct deste setup pega a 2200,
+    # que o Vagrantfile principal usa para web2/db, e a VM do cluster em estado
+    # "saved" nao consegue retomar (colisao de forwarded port).
+    l.vm.network "forwarded_port", id: "ssh", guest: 22, host: 2230, host_ip: "127.0.0.1"
+
+    # Raiz do repositorio: scripts/ e data/ (logs persistentes) ficam acessiveis.
+    l.vm.synced_folder "..", "/projeto"
+
+    l.vm.provider "virtualbox" do |vb|
+      vb.name   = "tp1-linux"
+      vb.memory = "512"
+      vb.cpus   = 1
+    end
+
+    l.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y nmap curl dnsutils openssh-client
+    SHELL
+  end
+end

@@ -1,0 +1,7 @@
+---
+# Nos do cluster resolvidos via /etc/hosts. Os IPs vem de [all:vars] no inventario.
+hosts_internos:
+  - { ip: "{{ bastion_ip }}", nome: "bastion" }
+  - { ip: "{{ web1_ip }}", nome: "web1" }
+  - { ip: "{{ web2_ip }}", nome: "web2" }
+  - { ip: "{{ db_host }}", nome: "db" }

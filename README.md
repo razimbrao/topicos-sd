@@ -115,6 +115,22 @@ powershell -ExecutionPolicy Bypass -File .\scripts\auditar-seguranca.ps1
 | Root restriction | `ssh root@ip` | Conexão negada |
 | Firewall UFW | `nmap -p 22,80,443,514,3306 ip` | Apenas 22/80/443 abertas |
 
+### Validação em ambiente Linux
+
+O setup separado em `vagrant-linux/` sobe a VM `linux` (192.168.56.30), uma estação Ubuntu fora
+do cluster e do inventário Ansible, com `nmap`, `curl` e `dig`. A raiz do repositório é montada
+em `/projeto`.
+
+```bash
+cd vagrant-linux && vagrant up
+vagrant ssh -c "bash /projeto/scripts/auditar-seguranca.sh"
+vagrant ssh -c "bash /projeto/scripts/validar-rede.sh"
+vagrant ssh -c "curl -s http://192.168.56.10/ | grep 'no:'"
+```
+
+O teste de sobrevivência depende do Vagrant e roda no host Linux que executa o cluster:
+`bash scripts/teste-sobrevivencia.sh`.
+
 ### 5. Idempotência
 
 ```bash
