@@ -19,7 +19,7 @@ dig +short google.com && echo "[OK] DNS resolvendo" || echo "[FALHA] DNS nao res
 
 echo
 echo "--- Conectividade interna host-only ---"
-for alvo in 192.168.56.10 192.168.56.11 192.168.56.12 192.168.56.13; do
+for alvo in 192.168.56.10 192.168.56.11 192.168.56.12 192.168.56.20; do
   if ping -c 1 -W 2 "$alvo" >/dev/null 2>&1; then
     echo "[OK]    $alvo alcancavel"
   else

@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
   # VM: db - servidor de persistencia (centralizador de logs rsyslog)
   config.vm.define "db" do |db|
     db.vm.hostname = "db"
-    db.vm.network "private_network", ip: "192.168.56.13"
+    db.vm.network "private_network", ip: "192.168.56.20"
 
     # PERSISTENCIA: o estado vive no host fisico, nao na VM.
     # dmode/fmode sao necessarios porque o vboxsf ignora chown/chmod dentro da VM

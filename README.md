@@ -37,7 +37,7 @@ manualmente: tudo o que existe no ambiente está descrito neste repositório.
 | `bastion` | 192.168.56.10 | Ponto único de entrada, proxy reverso, nó de controle Ansible | 22, 80, 443 |
 | `web1` | 192.168.56.11 | Nó de processamento de aplicação | 22, 80, 443 |
 | `web2` | 192.168.56.12 | Nó secundário (redundância/balanceamento) | 22, 80, 443 |
-| `db` | 192.168.56.13 | Centralizador de logs (rsyslog) e persistência | 22, 80, 443 + 514 restrito à rede interna |
+| `db` | 192.168.56.20 | Centralizador de logs (rsyslog) e persistência | 22, 80, 443 + 514 restrito à rede interna |
 
 ## Pré-requisitos no host
 
