@@ -25,7 +25,7 @@ manualmente: tudo o que existe no ambiente está descrito neste repositório.
                     └────── rsyslog ───┘
                               ▼
                        ┌────────────┐
-                       │     db     │  .13  rsyslog server
+                       │     db     │  .20  rsyslog server
                        └─────┬──────┘
                              ▼
               synced_folder → ./data/dados_persistentes  (host físico)
