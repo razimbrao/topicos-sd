@@ -140,6 +140,32 @@ cd vagrant && vagrant provision bastion
 Na segunda execução consecutiva o resumo do Ansible deve apresentar `changed=0` em todos os
 hosts.
 
+### Roteiro completo em host Linux
+
+Com o cluster no ar e o host rodando Linux, as cinco validações acima podem ser executadas
+em sequência a partir da raiz do repositório. A VM de `vagrant-linux/` é dispensável neste
+caso: o próprio host (192.168.56.1) já está fora das regras da porta 514, então a auditoria
+feita dele produz o mesmo resultado.
+
+```bash
+cd topicos-sd
+
+# 1. Rede (NAT + DNS + host-only) — roda DENTRO de uma VM
+cd vagrant && vagrant ssh web1 -c "bash /scripts/validar-rede.sh" && cd ..
+
+# 2. Proxy reverso e balanceamento — do host
+for i in $(seq 1 6); do curl -s http://192.168.56.10/ | grep "no:"; done
+
+# 3. Auditoria de segurança — do host (precisa de nmap)
+bash scripts/auditar-seguranca.sh
+
+# 4. Teste de sobrevivência — do host (precisa do vagrant)
+bash scripts/teste-sobrevivencia.sh
+
+# 5. Idempotência — segunda execução deve dar changed=0
+cd vagrant && vagrant provision bastion
+```
+
 ## Decisões técnicas
 
 - **`db` expõe 514 apenas para os IPs de `bastion`, `web1` e `web2`.** A política de permissão mínima do roteiro
