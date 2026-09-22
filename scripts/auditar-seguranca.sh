@@ -1,7 +1,4 @@
 #!/bin/bash
-# Auditoria ativa da secao 6 do roteiro, versao Linux do auditar-seguranca.ps1.
-# Executar na VM de validacao:  cd vagrant-linux && vagrant ssh -c "bash /projeto/scripts/auditar-seguranca.sh"
-# (funciona tambem em qualquer host Linux com ssh e nmap na rede 192.168.56.0/24)
 set -u
 
 command -v nmap >/dev/null || { echo "nmap nao encontrado (apt-get install -y nmap)"; exit 1; }

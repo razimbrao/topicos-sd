@@ -1,7 +1,4 @@
 ---
-# Transparencia de acesso (Tanenbaum): o cliente enxerga apenas o bastion,
-# nunca a topologia interna web1/web2.
-
 - name: Instala o Nginx no bastion
   ansible.builtin.apt:
     name: nginx

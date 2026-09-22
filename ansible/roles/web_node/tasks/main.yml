@@ -19,7 +19,6 @@
     group: root
     mode: "0644"
     content: |
-      # Gerenciado pelo Ansible
       add_header X-No-Aplicacao "{{ inventory_hostname }}" always;
   notify: Recarrega nginx
 

@@ -1,7 +1,4 @@
 ---
-# Playbook mestre. Idempotente: pode ser reexecutado quantas vezes for necessario.
-# Ordem importa: o servidor de logs (db) sobe antes dos clientes que enviam para ele.
-
 - name: Base comum a todos os nos
   hosts: all
   become: true

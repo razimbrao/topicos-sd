@@ -1,6 +1,3 @@
-# Auditoria ativa da secao 6 do roteiro, executada a partir do HOST Windows.
-# Uso:  powershell -ExecutionPolicy Bypass -File .\scripts\auditar-seguranca.ps1
-
 $vms = @{ bastion = "192.168.56.10"; web1 = "192.168.56.11"; web2 = "192.168.56.12"; db = "192.168.56.20" }
 $nmap = "C:\Program Files (x86)\Nmap\nmap.exe"
 

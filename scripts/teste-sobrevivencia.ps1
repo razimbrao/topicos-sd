@@ -1,7 +1,3 @@
-# Teste de Sobrevivencia (secao 4 do roteiro), executado a partir do HOST Windows.
-# Destroi a VM db e comprova que os logs anteriores sobreviveram.
-# Uso:  powershell -ExecutionPolicy Bypass -File .\scripts\teste-sobrevivencia.ps1
-
 $ErrorActionPreference = "Stop"
 $raiz = Split-Path -Parent $PSScriptRoot
 $logs = Join-Path $raiz "data\dados_persistentes\logs"

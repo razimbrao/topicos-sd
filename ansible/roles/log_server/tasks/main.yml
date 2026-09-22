@@ -1,7 +1,4 @@
 ---
-# Fonte da Verdade: os logs vivem no synced_folder, no host fisico.
-# A VM e "gado" e pode ser destruida; o estado sobrevive.
-
 - name: Verifica se o diretorio persistente esta montado do host
   ansible.builtin.command: findmnt --noheadings --target {{ dir_persistente }} -o SOURCE,FSTYPE
   register: montagem_persistente
@@ -37,8 +34,6 @@
     mode: "0755"
     content: |
       #!/bin/bash
-      # Gera registros continuos para comprovar a continuidade dos logs
-      # antes e depois de um 'vagrant destroy -f db'.
       while true; do
         logger -t tp1-estado "registro persistente gerado em $(date --iso-8601=seconds) por $(hostname)"
         sleep 5

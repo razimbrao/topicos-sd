@@ -1,11 +1,4 @@
 #!/bin/bash
-# Teste de Sobrevivencia (secao 4 do roteiro), versao Linux do teste-sobrevivencia.ps1.
-# Destroi a VM db e comprova que os logs anteriores sobreviveram.
-#
-# Precisa do Vagrant, entao roda no HOST Linux que executa o cluster:
-#   bash scripts/teste-sobrevivencia.sh
-# A VM de validacao (vagrant-linux) nao consegue destruir o db; nela use apenas
-# a conferencia dos logs em /projeto/data/dados_persistentes/logs.
 set -euo pipefail
 
 raiz="$(cd "$(dirname "$0")/.." && pwd)"
