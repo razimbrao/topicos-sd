@@ -1,0 +1,116 @@
+---
+- name: Atualiza o cache do apt
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Instala utilitarios de diagnostico
+  ansible.builtin.apt:
+    name:
+      - curl
+      - htop
+      - tcpdump
+      - dnsutils
+      - jq
+      - ufw
+    state: present
+
+- name: Define o fuso horario
+  community.general.timezone:
+    name: America/Sao_Paulo
+
+- name: Mapeia todos os nos e o VIP no /etc/hosts
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} TP2 - nos do laboratorio"
+    block: |
+      {% for n in nodes %}
+      {{ n.ip }} {{ n.name }}
+      {% endfor %}
+      {{ vip_address }} app.local vip
+
+- name: Habilita o encaminhamento IPv4 (exigido pelo K3s e pelo VRRP)
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: true
+
+- name: Firewall - nega entrada por padrao
+  community.general.ufw:
+    direction: incoming
+    policy: deny
+
+- name: Firewall - libera saida
+  community.general.ufw:
+    direction: outgoing
+    policy: allow
+
+- name: Firewall - trafego roteado (pods/flannel nos nos K3s, nega nos demais)
+  community.general.ufw:
+    direction: routed
+    policy: "{{ 'allow' if 'k3s_cluster' in group_names else 'deny' }}"
+
+- name: Firewall - SSH
+  community.general.ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+
+- name: Firewall - HTTP nos proxies
+  community.general.ufw:
+    rule: allow
+    port: "80"
+    proto: tcp
+  when: "'proxies' in group_names"
+
+- name: Firewall - VRRP (protocolo 112) vindo do outro proxy
+  community.general.ufw:
+    rule: allow
+    src: "{{ vrrp_peer }}"
+  when: "'proxies' in group_names"
+
+- name: Firewall - comunicacao irrestrita entre os nos do cluster e redes de pods/servicos
+  community.general.ufw:
+    rule: allow
+    src: "{{ item }}"
+  loop: "{{ (groups['k3s_cluster'] | map('extract', hostvars, 'node_ip') | list) + ['10.42.0.0/16', '10.43.0.0/16'] }}"
+  when: "'k3s_cluster' in group_names"
+
+- name: Firewall - API do Kubernetes para o bastion (kubectl)
+  community.general.ufw:
+    rule: allow
+    port: "6443"
+    proto: tcp
+    src: "{{ hostvars['bastion'].node_ip }}"
+  when: "'k3s_masters' in group_names"
+
+- name: Firewall - NodePort 30080 para os proxies
+  community.general.ufw:
+    rule: allow
+    port: "30080"
+    proto: tcp
+    src: "{{ hostvars[item].node_ip }}"
+  loop: "{{ groups['proxies'] }}"
+  when: "'k3s_cluster' in group_names"
+
+# Ao ativar o UFW pela primeira vez o conntrack passa a valer e a conexao SSH ja
+# aberta pelo Ansible pode ser descartada como INVALID. Roda em background,
+# derruba a conexao multiplexada e confere o resultado em uma conexao nova.
+- name: Firewall - ativa (e habilita no boot)
+  community.general.ufw:
+    state: enabled
+  async: 60
+  poll: 0
+  register: ufw_enable
+  changed_when: false
+
+- name: Firewall - reabre a conexao SSH
+  ansible.builtin.meta: reset_connection
+
+- name: Firewall - confere a ativacao
+  ansible.builtin.async_status:
+    jid: "{{ ufw_enable.ansible_job_id }}"
+  register: ufw_result
+  until: ufw_result.finished
+  retries: 30
+  delay: 2

@@ -1,0 +1,30 @@
+---
+- name: Base comum, /etc/hosts e firewall
+  hosts: all
+  roles:
+    - common
+
+- name: Proxy reverso redundante (Nginx + Keepalived, VIP 192.168.56.254)
+  hosts: proxies
+  roles:
+    - proxy_ha
+
+- name: K3s control plane
+  hosts: k3s_masters
+  roles:
+    - k3s_server
+
+- name: K3s worker
+  hosts: k3s_workers
+  roles:
+    - k3s_agent
+
+- name: Build da imagem e deploy dos manifestos (a partir do bastion)
+  hosts: bastion
+  roles:
+    - app_deploy
+
+- name: Backup periodico dos registros no volume sincronizado da VM 4
+  hosts: backup_storage
+  roles:
+    - backup_sync
