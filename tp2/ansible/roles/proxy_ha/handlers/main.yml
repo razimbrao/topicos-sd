@@ -1,0 +1,10 @@
+---
+- name: Recarrega nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+
+- name: Reinicia keepalived
+  ansible.builtin.systemd:
+    name: keepalived
+    state: restarted

@@ -1,0 +1,30 @@
+upstream k3s_cluster {
+    least_conn;
+{% for host in groups['k3s_cluster'] %}
+    server {{ hostvars[host].node_ip }}:30080 max_fails=3 fail_timeout=5s;
+{% endfor %}
+}
+
+server {
+    listen 80 default_server;
+    server_name _;
+
+    # Identifica qual proxy atendeu (evidencia do failover no Teste B)
+    add_header X-Proxy {{ inventory_hostname }} always;
+
+    location = /nginx-health {
+        access_log off;
+        return 200 "ok\n";
+    }
+
+    location / {
+        proxy_pass http://k3s_cluster;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 3s;
+        proxy_read_timeout 10s;
+        proxy_next_upstream error timeout http_502 http_503 http_504;
+    }
+}

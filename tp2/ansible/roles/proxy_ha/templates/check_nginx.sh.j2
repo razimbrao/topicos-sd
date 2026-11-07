@@ -1,0 +1,5 @@
+#!/bin/sh
+# Health check do Keepalived: falha se o Nginx local nao estiver respondendo.
+systemctl is-active --quiet nginx || exit 1
+curl -s -o /dev/null --max-time 1 http://127.0.0.1/nginx-health || exit 1
+exit 0

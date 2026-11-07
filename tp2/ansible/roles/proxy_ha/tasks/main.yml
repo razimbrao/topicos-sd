@@ -1,0 +1,55 @@
+---
+- name: Instala Nginx e Keepalived
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - keepalived
+    state: present
+
+- name: Permite bind em IP nao local (VIP ainda ausente no BACKUP)
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: "1"
+    sysctl_set: true
+
+- name: Script de health check do Nginx
+  ansible.builtin.template:
+    src: check_nginx.sh.j2
+    dest: /usr/local/bin/check_nginx.sh
+    mode: "0755"
+
+- name: Configuracao do Keepalived (VRRP)
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    mode: "0644"
+  notify: Reinicia keepalived
+
+- name: Site do proxy reverso para o cluster K3s
+  ansible.builtin.template:
+    src: k3s-app.conf.j2
+    dest: /etc/nginx/sites-available/k3s-app
+    mode: "0644"
+  notify: Recarrega nginx
+
+- name: Habilita o site k3s-app
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/k3s-app
+    dest: /etc/nginx/sites-enabled/k3s-app
+    state: link
+  notify: Recarrega nginx
+
+- name: Remove o site default
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Recarrega nginx
+
+- name: Habilita e inicia nginx e keepalived (sobem sozinhos no boot)
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - nginx
+    - keepalived

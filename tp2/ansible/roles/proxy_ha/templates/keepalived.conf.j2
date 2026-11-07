@@ -1,0 +1,37 @@
+global_defs {
+    router_id {{ inventory_hostname }}
+    enable_script_security
+    script_user root
+}
+
+vrrp_script check_nginx {
+    script "/usr/local/bin/check_nginx.sh"
+    interval 1
+    fall 1
+    rise 2
+    # Sem "weight": se o Nginx falha a instancia entra em FAULT, solta o VIP na
+    # hora e anuncia prioridade 0, entao o BACKUP assume sem esperar 3 adverts.
+    # (Com weight negativo o BACKUP descarta os adverts de prioridade menor e
+    # so assume apos o master_down_interval, ~3-4 s nos testes.)
+}
+
+vrrp_instance VI_1 {
+    state {{ vrrp_state }}
+    interface {{ priv_iface }}
+    virtual_router_id 51
+    priority {{ vrrp_priority }}
+    advert_int 1
+
+    unicast_src_ip {{ node_ip }}
+    unicast_peer {
+        {{ vrrp_peer }}
+    }
+
+    virtual_ipaddress {
+        {{ vip_address }}/24 dev {{ priv_iface }}
+    }
+
+    track_script {
+        check_nginx
+    }
+}
