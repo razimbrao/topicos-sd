@@ -9,3 +9,7 @@ data/dados_persistentes/*
 
 # Ansible
 *.retry
+
+# TP2: backups gerados em runtime na VM 4 (o diretorio e versionado, o conteudo nao)
+tp2/data_backup/*
+!tp2/data_backup/.gitkeep

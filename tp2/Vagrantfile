@@ -1,0 +1,73 @@
+# TP2 - K3s + Proxy HA (Keepalived/Nginx) + ciclo de vida nao destrutivo.
+#
+# Ordem de definicao: bastion e a VM 1 da topologia, mas e definida por ultimo
+# porque e o no de controle Ansible e precisa que as outras tres ja existam
+# (e que suas chaves privadas estejam em .vagrant/machines) para provisiona-las.
+
+NODES = {
+  "k3s-server" => { ip: "192.168.56.20", cpus: 2, memory: 2048, vb: "dcc091a-vm2-k3s-server" },
+  "k3s-worker" => { ip: "192.168.56.30", cpus: 2, memory: 2048, vb: "dcc091a-vm3-k3s-worker" },
+  "auxiliary"  => { ip: "192.168.56.40", cpus: 1, memory: 1024, vb: "dcc091a-vm4-auxiliary" },
+}
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.boot_timeout = 900
+
+  NODES.each do |name, spec|
+    config.vm.define name do |node|
+      node.vm.hostname = name
+      node.vm.network "private_network", ip: spec[:ip]
+      node.vm.provider "virtualbox" do |v|
+        v.name   = spec[:vb]
+        v.cpus   = spec[:cpus]
+        v.memory = spec[:memory]
+      end
+
+      if name == "auxiliary"
+        node.vm.synced_folder "./data_backup", "/var/lib/app_data",
+          create: true,
+          mount_options: ["dmode=777", "fmode=666"]
+      end
+    end
+  end
+
+  config.vm.define "bastion", primary: true do |b|
+    b.vm.hostname = "bastion"
+    b.vm.network "private_network", ip: "192.168.56.10"
+    b.vm.provider "virtualbox" do |v|
+      v.name   = "dcc091a-vm1-bastion"
+      v.cpus   = 1
+      v.memory = 1024
+    end
+
+    b.vm.synced_folder "./.vagrant/machines", "/home/vagrant/machines"
+    b.vm.synced_folder "./ansible", "/ansible"
+    b.vm.synced_folder "./k3s", "/k3s"
+    b.vm.synced_folder "./app", "/app"
+
+    b.vm.provision "shell", name: "bootstrap-ansible", inline: <<-SHELL
+      set -e
+      if ! command -v ansible-playbook >/dev/null; then
+        apt-get update
+        apt-get install -y software-properties-common
+        add-apt-repository --yes --update ppa:ansible/ansible
+        apt-get install -y ansible
+      fi
+      install -d -m 700 -o vagrant -g vagrant /home/vagrant/keys
+      for vm in k3s-server k3s-worker auxiliary; do
+        install -m 600 -o vagrant -g vagrant \
+          /home/vagrant/machines/$vm/virtualbox/private_key /home/vagrant/keys/$vm
+      done
+    SHELL
+
+    b.vm.provision "ansible_local" do |ansible|
+      ansible.install           = false
+      ansible.provisioning_path = "/ansible"
+      ansible.config_file       = "/ansible/ansible.cfg"
+      ansible.inventory_path    = "inventory/hosts.yml"
+      ansible.playbook          = "site.yml"
+      ansible.limit             = "all"
+    end
+  end
+end
