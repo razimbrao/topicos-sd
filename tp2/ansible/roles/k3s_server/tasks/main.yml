@@ -1,0 +1,65 @@
+---
+- name: Diretorio de configuracao do K3s
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    mode: "0755"
+
+- name: Configuracao do K3s server (IP e flannel na rede privada)
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    mode: "0600"
+  notify: Reinicia k3s
+
+- name: Instala o K3s server (versao fixa)
+  ansible.builtin.shell: >
+    curl -sfL https://get.k3s.io |
+    INSTALL_K3S_VERSION="{{ k3s_version }}" INSTALL_K3S_EXEC="server" sh -
+  args:
+    creates: /etc/systemd/system/k3s.service
+
+- name: Aplica mudancas de configuracao antes de seguir
+  ansible.builtin.meta: flush_handlers
+
+- name: Habilita e inicia o k3s (sobe sozinho no boot)
+  ansible.builtin.systemd:
+    name: k3s
+    enabled: true
+    state: started
+
+- name: Aguarda o token de juncao do cluster
+  ansible.builtin.wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+
+- name: Le o token de juncao
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_node_token
+
+- name: Publica o token como fato para o k3s_agent
+  ansible.builtin.set_fact:
+    k3s_join_token: "{{ k3s_node_token.content | b64decode | trim }}"
+
+- name: Le o kubeconfig gerado pelo K3s
+  ansible.builtin.slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  register: k3s_kubeconfig
+
+- name: Cria ~/.kube no bastion
+  ansible.builtin.file:
+    path: /home/vagrant/.kube
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: "0700"
+  delegate_to: bastion
+
+- name: Exporta o kubeconfig para o bastion apontando para o IP do server
+  ansible.builtin.copy:
+    content: "{{ k3s_kubeconfig.content | b64decode | replace('127.0.0.1', node_ip) }}"
+    dest: /home/vagrant/.kube/config
+    owner: vagrant
+    group: vagrant
+    mode: "0600"
+  delegate_to: bastion

@@ -1,0 +1,12 @@
+# Gerenciado pelo Ansible (role k3s_server)
+node-ip: {{ node_ip }}
+advertise-address: {{ node_ip }}
+flannel-iface: {{ priv_iface }}
+tls-san:
+  - {{ node_ip }}
+write-kubeconfig-mode: "0644"
+# Ingress e LB embutidos nao sao usados (a borda e o Nginx dos proxies);
+# desativados para nao abrir 80/443 nos nos e economizar memoria.
+disable:
+  - traefik
+  - servicelb
