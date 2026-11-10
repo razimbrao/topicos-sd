@@ -1,0 +1,199 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{parskip}
+
+\lstset{basicstyle=\ttfamily\footnotesize,frame=single,breaklines=true,
+  columns=fullflexible,backgroundcolor=\color{gray!8},rulecolor=\color{gray!40}}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+
+\title{\textbf{TP2 --- Orquestração K3s, Proxy Redundante (HA)\\e Persistência de Estado Não Destrutiva}\\[4pt]
+\large DCC091A --- Tópicos em Redes e Processamento Distribuído I}
+\author{Grupo 6}
+\date{10 de novembro de 2026}
+
+\begin{document}
+\maketitle
+
+\section{Objetivo}
+Evoluir a infraestrutura do TP1 para um cluster K3s de dois nós protegido por dois proxies
+Nginx em alta disponibilidade (Keepalived com VIP flutuante 192.168.56.254), com uma
+aplicação web e um banco de dados persistente, e demonstrar que o ambiente pode ser
+pausado (\texttt{vagrant suspend}/\texttt{halt}) e retomado sem reprovisionamento.
+
+\section{Arquitetura}
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{llllX}
+\toprule
+VM & Nome & IP & vCPU/RAM & Papel \\
+\midrule
+1 & bastion    & .10 & 1 / 1024 MB & Nó de controle Ansible, kubectl, build da imagem, Nginx + Keepalived MASTER (101) \\
+2 & k3s-server & .20 & 2 / 2048 MB & K3s server: control plane, datastore, CoreDNS, local-path \\
+3 & k3s-worker & .30 & 2 / 2048 MB & K3s agent \\
+4 & auxiliary  & .40 & 1 / 1024 MB & Nginx + Keepalived BACKUP (100), backup em \texttt{./data\_backup} \\
+\bottomrule
+\end{tabularx}
+\caption{Máquinas virtuais (Ubuntu 22.04, rede host-only 192.168.56.0/24, interface \texttt{enp0s8}).}
+\end{table}
+
+Fluxo de uma requisição: cliente $\rightarrow$ VIP 192.168.56.254:80 (proxy que detém o VIP)
+$\rightarrow$ upstream \texttt{least\_conn} para 192.168.56.20:30080 e 192.168.56.30:30080
+(NodePort) $\rightarrow$ kube-proxy $\rightarrow$ uma das duas réplicas da API $\rightarrow$
+PostgreSQL (Service ClusterIP \texttt{postgres}).
+
+\subsection{Aplicação}
+API em Go (\texttt{app/main.go}) com as rotas \texttt{/info} (Pod e nó que atenderam, total
+de registros), \texttt{/health} (200 se o banco responde, usada nas probes) e
+\texttt{/records} (GET lista, POST grava). O Dockerfile é multi-stage: compila em
+\texttt{golang:1.22-alpine} e copia apenas o binário estático para uma imagem
+\texttt{FROM scratch}, executada como usuário não-root. A imagem final tem
+\textbf{5,73 MB} (limite do roteiro: 100 MB).
+
+A imagem é gerada com \texttt{podman} no bastion, exportada como \texttt{docker-archive}
+e importada no containerd de cada nó (\texttt{k3s ctr images import}), com
+\texttt{imagePullPolicy: Never}. Assim não é preciso um registry.
+
+\subsection{Manifestos (\texttt{k3s/})}
+\begin{itemize}
+\item \texttt{01-configmap-secret.yaml}: ConfigMap \texttt{app-config} (ambiente, porta, host,
+  nome e usuário do banco) e Secret \texttt{db-credentials} (senha).
+\item \texttt{02-pvc.yaml}: PVC \texttt{postgres-data}, 1 Gi, \texttt{local-path}, RWO.
+\item \texttt{03-deployment.yaml}: PostgreSQL (1 réplica, estratégia \texttt{Recreate}, PVC) e
+  API (2 réplicas, \texttt{topologySpreadConstraints} por nó, liveness e readiness em
+  \texttt{/health}, nome do Pod e do nó injetados pela Downward API).
+\item \texttt{04-service.yaml}: \texttt{postgres} (ClusterIP) e \texttt{tp2-api} (NodePort 30080).
+\end{itemize}
+
+\subsection{Automação (Ansible a partir do bastion)}
+O \texttt{Vagrantfile} define o bastion por último: ele recebe as chaves privadas das outras
+VMs (\texttt{.vagrant/machines}) e executa o \texttt{site.yml} via \texttt{ansible\_local}.
+\begin{itemize}
+\item \textbf{common}: pacotes (curl, htop, tcpdump, dnsutils, jq), fuso
+  America/Sao\_Paulo, \texttt{/etc/hosts} com todos os nós e o VIP, \texttt{ip\_forward} e UFW
+  (entrada negada por padrão; regras por papel).
+\item \textbf{proxy\_ha}: Nginx com upstream para os NodePorts, Keepalived com VRRP unicast,
+  \texttt{check\_nginx.sh} e \texttt{ip\_nonlocal\_bind}.
+\item \textbf{k3s\_server}: \texttt{/etc/rancher/k3s/config.yaml} (IP e flannel em
+  \texttt{enp0s8}, Traefik e ServiceLB desativados), instalação na versão fixa
+  v1.31.4+k3s1, extração do token e exportação do kubeconfig para o bastion.
+\item \textbf{k3s\_agent}: instalação do agent e junção ao server com o token extraído.
+\item \textbf{app\_deploy}: build da imagem (só quando o código muda), distribuição,
+  \texttt{kubectl apply} e espera pelo rollout.
+\item \textbf{backup\_sync} (extra): timer na VM 4 que grava \texttt{/records} em
+  \texttt{/var/lib/app\_data} (synced\_folder \texttt{./data\_backup}) a cada minuto.
+\end{itemize}
+
+\section{Análise da proposta inicial}
+A primeira versão do grupo acertava a topologia e os parâmetros, mas tinha problemas que
+impediriam o funcionamento ou os testes, e que foram corrigidos:
+\begin{itemize}
+\item a interface \texttt{eth1} não existe na box \texttt{ubuntu/jammy64} (o nome é
+  \texttt{enp0s8}), então o VIP e o flannel não subiriam;
+\item o Ansible seria executado no host com a chave insegura global do Vagrant, mas o
+  Vagrant gera uma chave por VM e o roteiro pede o Ansible no bastion;
+\item a aplicação (\texttt{http-echo}) não tinha build multi-stage, banco de dados nem as
+  rotas \texttt{/health} e \texttt{/info};
+\item o PVC \texttt{local-path} RWO montado nas duas réplicas as prende ao mesmo nó;
+\item o UFW era instalado sem regras, o kubeconfig não era exportado, e o
+  \texttt{creates} do agent apontava para um arquivo inexistente (sem idempotência).
+\end{itemize}
+
+\section{Problemas encontrados durante a validação}
+\begin{itemize}
+\item \textbf{Ativação do UFW travava o playbook.} Na primeira ativação o conntrack passa a
+  valer e a conexão SSH já aberta pelo Ansible nos nós K3s era descartada. A tarefa passou
+  a rodar em \texttt{async}, seguida de \texttt{meta: reset\_connection} e
+  \texttt{async\_status}.
+\item \textbf{Failover em $\sim$4 s.} Com \texttt{weight -20} o master caía para prioridade
+  81, mas o BACKUP descarta anúncios de prioridade menor e só assume após o
+  \texttt{master\_down\_interval}. Sem \texttt{weight}, a falha do script coloca o master
+  em FAULT, ele solta o VIP e anuncia prioridade 0: o tempo caiu para $\sim$1 s.
+\item \textbf{Idempotência do Secret.} Com \texttt{stringData}, o \texttt{kubectl apply}
+  sempre responde \texttt{configured}; o Secret passou a usar \texttt{data} (base64).
+\item \textbf{Portas 80/443 abertas nos nós K3s} pelo Traefik e pelo ServiceLB embutidos,
+  que não são usados; foram desativados.
+\end{itemize}
+
+\section{Resultados dos testes}
+Todos os resultados abaixo foram obtidos em um ambiente recriado do zero
+(\texttt{vagrant destroy -f \&\& vagrant up}, 11 min 46 s, sem falhas) em um host Windows 11
+com VirtualBox 7.2.16 e Vagrant 2.4.9.
+
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+Teste & Resultado & Status \\
+\midrule
+Idempotência & 2ª execução do \texttt{site.yml}: \texttt{changed=0, failed=0} nas 4 VMs & OK \\
+A --- VIP e balanceamento & 10 consultas a \texttt{/info}: 6 na réplica do k3s-worker e 4 na do k3s-server & OK \\
+B --- failover do proxy & Nginx parado às 13:44:49,40; bastion em FAULT às 49,88; VM 4 MASTER às 50,50 (\textbf{1,09 s}). 1 de 48 requisições perdida (a que estava em curso). VIP volta ao bastion quando o Nginx retorna & OK \\
+C --- suspend/resume & API de volta pelo VIP em \textbf{51 s}; registro gravado antes preservado & OK \\
+C --- halt/up & API de volta em 108 s; pods, VIP e registros restabelecidos sem reprovisionar & OK \\
+D --- reconciliação & Pod apagado recriado, 2/2 réplicas prontas em \textbf{4 s} & OK \\
+Backup (VM 4) & \texttt{records.json} e \texttt{backup.log} atualizados no host a cada minuto & OK \\
+\bottomrule
+\end{tabularx}
+\caption{Resumo da validação.}
+\end{table}
+
+\subsection*{Trechos de saída}
+Teste A:
+\begin{lstlisting}
+13:44:32 proxy=bastion {"node":"k3s-worker","pod":"tp2-api-7598cc9988-rpg9f",...}
+13:44:33 proxy=bastion {"node":"k3s-server","pod":"tp2-api-7598cc9988-ht7g2",...}
+13:44:34 proxy=bastion {"node":"k3s-worker","pod":"tp2-api-7598cc9988-rpg9f",...}
+\end{lstlisting}
+
+Teste B (logs do Keepalived):
+\begin{lstlisting}
+13:44:49.401 bastion   systemd: Stopped A high performance web server ...
+13:44:49.884 bastion   Keepalived_vrrp: (VI_1) Entering FAULT STATE
+13:44:50.496 auxiliary Keepalived_vrrp: (VI_1) Entering MASTER STATE
+13:45:15.499 auxiliary Keepalived_vrrp: (VI_1) Entering BACKUP STATE
+\end{lstlisting}
+
+Teste C (suspend/resume):
+\begin{lstlisting}
+>>> gravando: registro-teste-c-1794329137
+>>> API respondendo pelo VIP 51s apos o inicio da retomada
+>>> comando vagrant concluido em 80s
+OK: registro 'registro-teste-c-1794329137' preservado
+\end{lstlisting}
+
+\section{Limitações}
+\begin{itemize}
+\item \textbf{Tempo do \texttt{vagrant resume}.} O cluster retoma de imediato, mas o
+  Vagrant retoma as VMs uma por vez e espera o SSH de cada uma; o comando inteiro leva
+  70--80 s. O serviço volta pelo VIP antes disso (51--57 s nas medições), com pouca folga
+  em relação aos 60 s do roteiro e dependente do desempenho do host.
+\item \textbf{NodePort acessível da sub-rede.} O kube-proxy insere suas regras de DNAT
+  antes das do UFW, então a porta 30080 dos nós K3s responde a qualquer host de
+  192.168.56.0/24, não só aos proxies. O ponto de entrada documentado é o VIP.
+\item \textbf{Banco em um único nó.} Com \texttt{local-path}, o volume do PostgreSQL pertence
+  ao nó onde foi criado; se esse nó cair, o banco fica indisponível até ele voltar. Os
+  dados ficam no disco da VM e também são copiados em JSON para o host pela VM 4.
+\end{itemize}
+
+\section{Como reproduzir}
+\begin{lstlisting}
+cd tp2
+vagrant up
+bash scripts/teste-a-balanceamento.sh 10
+bash scripts/teste-b-failover.sh
+bash scripts/teste-c-ciclo-de-vida.sh          # suspend/resume
+bash scripts/teste-c-ciclo-de-vida.sh halt     # halt/up
+bash scripts/teste-d-reconciliacao.sh
+vagrant provision bastion                      # idempotencia: changed=0
+\end{lstlisting}
+
+\end{document}
