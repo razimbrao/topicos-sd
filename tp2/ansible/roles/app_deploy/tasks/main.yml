@@ -1,0 +1,81 @@
+---
+# Roda no bastion: compila a imagem (multi-stage), distribui para os nos K3s
+# e aplica os manifestos com kubectl usando o kubeconfig exportado pelo k3s_server.
+
+- name: Instala o podman (build de imagens sem daemon)
+  ansible.builtin.apt:
+    name: podman
+    state: present
+
+- name: Instala o kubectl na mesma versao do cluster
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    checksum: "sha256:https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl.sha256"
+    dest: /usr/local/bin/kubectl
+    mode: "0755"
+
+- name: Calcula a versao do codigo da aplicacao
+  ansible.builtin.set_fact:
+    app_src_hash: "{{ (lookup('file', '/app/main.go') ~ lookup('file', '/app/go.mod') ~ lookup('file', '/app/Dockerfile')) | hash('sha1') }}"
+
+- name: Diretorio dos artefatos de imagem
+  ansible.builtin.file:
+    path: /opt/tp2
+    state: directory
+    mode: "0755"
+
+- name: Build multi-stage da imagem e exportacao para tar (so quando o codigo muda)
+  ansible.builtin.shell: >
+    podman build --network host -t {{ app_image }} /app &&
+    podman save --format docker-archive -o /opt/tp2/tp2-api-{{ app_src_hash[:12] }}.tar {{ app_image }}
+  args:
+    creates: "/opt/tp2/tp2-api-{{ app_src_hash[:12] }}.tar"
+
+- name: Garante o diretorio de imagens do K3s nos nos
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/agent/images
+    state: directory
+    mode: "0755"
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['k3s_cluster'] }}"
+
+- name: Copia a imagem para os nos do cluster (diretorio de auto-import do K3s)
+  ansible.builtin.copy:
+    src: "/opt/tp2/tp2-api-{{ app_src_hash[:12] }}.tar"
+    dest: /var/lib/rancher/k3s/agent/images/tp2-api.tar
+    mode: "0644"
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['k3s_cluster'] }}"
+  register: image_copy
+
+- name: Importa a imagem no containerd dos nos que receberam versao nova
+  ansible.builtin.command: k3s ctr images import /var/lib/rancher/k3s/agent/images/tp2-api.tar
+  delegate_to: "{{ item.item }}"
+  loop: "{{ image_copy.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.changed
+
+- name: Aguarda os dois nos ficarem Ready
+  ansible.builtin.command: kubectl wait --for=condition=Ready node --all --timeout=180s
+  become: false
+  changed_when: false
+
+- name: Aplica os manifestos (kubectl apply e declarativo e idempotente)
+  ansible.builtin.command: kubectl apply -f /k3s/
+  become: false
+  register: kubectl_apply
+  changed_when: kubectl_apply.stdout_lines | reject('search', ' unchanged$') | list | length > 0
+
+- name: Reinicia a API quando a imagem mudou (a tag e fixa)
+  ansible.builtin.command: kubectl rollout restart deployment/tp2-api
+  become: false
+  when: image_copy.changed and 'deployment.apps/tp2-api created' not in kubectl_apply.stdout
+
+- name: Aguarda o rollout do banco e da API
+  ansible.builtin.command: "kubectl rollout status deployment/{{ item }} --timeout=300s"
+  become: false
+  loop:
+    - postgres
+    - tp2-api
+  changed_when: false

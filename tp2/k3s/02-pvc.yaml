@@ -1,0 +1,12 @@
+# Volume de 1 GB no local-path-provisioner (StorageClass padrao do K3s).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
