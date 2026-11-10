@@ -1,0 +1,56 @@
+---
+# VM 4: copia periodica dos registros do banco (via VIP) para o diretorio
+# sincronizado com o host (./data_backup -> /var/lib/app_data).
+
+- name: Script de backup
+  ansible.builtin.copy:
+    dest: /usr/local/bin/tp2-backup.sh
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -e
+      dir=/var/lib/app_data
+      mountpoint -q "$dir" || exit 0
+      tmp="$dir/.records.json.tmp"
+      if curl -sf --max-time 10 http://{{ vip_address }}/records -o "$tmp"; then
+        mv "$tmp" "$dir/records.json"
+        echo "$(date -Is) ok $(jq length "$dir/records.json") registros" >> "$dir/backup.log"
+      else
+        rm -f "$tmp"
+        echo "$(date -Is) falha ao consultar a API" >> "$dir/backup.log"
+      fi
+
+- name: Unidade systemd do backup
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/tp2-backup.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Backup dos registros do TP2 para o volume sincronizado
+      After=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/tp2-backup.sh
+
+- name: Timer do backup (a cada minuto)
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/tp2-backup.timer
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Executa o backup do TP2 a cada minuto
+
+      [Timer]
+      OnBootSec=1min
+      OnUnitActiveSec=1min
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Habilita o timer
+  ansible.builtin.systemd:
+    name: tp2-backup.timer
+    enabled: true
+    state: started
+    daemon_reload: true
