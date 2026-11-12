@@ -4,10 +4,15 @@
 # porque e o no de controle Ansible e precisa que as outras tres ja existam
 # (e que suas chaves privadas estejam em .vagrant/machines) para provisiona-las.
 
+#
+# O Vagrant retoma as VMs uma por vez, nesta ordem. k3s-worker (banco + uma
+# replica da API) e auxiliary (proxy BACKUP) vem primeiro para o servico voltar
+# pelo VIP antes das demais terminarem de ser retomadas.
+
 NODES = {
-  "k3s-server" => { ip: "192.168.56.20", cpus: 2, memory: 2048, vb: "dcc091a-vm2-k3s-server" },
   "k3s-worker" => { ip: "192.168.56.30", cpus: 2, memory: 2048, vb: "dcc091a-vm3-k3s-worker" },
   "auxiliary"  => { ip: "192.168.56.40", cpus: 1, memory: 1024, vb: "dcc091a-vm4-auxiliary" },
+  "k3s-server" => { ip: "192.168.56.20", cpus: 2, memory: 2048, vb: "dcc091a-vm2-k3s-server" },
 }
 
 Vagrant.configure("2") do |config|

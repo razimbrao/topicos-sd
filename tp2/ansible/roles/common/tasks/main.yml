@@ -3,6 +3,23 @@
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
+  # Atualizar o indice de pacotes nao altera a configuracao do sistema; sem isso
+  # toda execucao depois de 1 h aparece como "changed".
+  changed_when: false
+
+# Os timers de atualizacao automatica disparam logo apos um resume/up depois de
+# uma pausa longa e saturam as VMs de 1 vCPU (carga > 4 na auxiliary, SSH e
+# health check do Keepalived estourando o tempo). Atualizacoes sao feitas pelo
+# Ansible, entao os timers ficam desligados.
+- name: Desativa as atualizacoes automaticas do Ubuntu
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop:
+    - apt-daily.timer
+    - apt-daily-upgrade.timer
+    - unattended-upgrades.service
 
 - name: Instala utilitarios de diagnostico
   ansible.builtin.apt:

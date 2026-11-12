@@ -71,7 +71,9 @@ spec:
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
+          # Obrigatorio (nao so preferencia): com ScheduleAnyway o scheduler chegou
+          # a colocar as duas replicas no mesmo no apos um rollout.
+          whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
               app: tp2-api

@@ -54,7 +54,8 @@ curl http://192.168.56.254/info
 ```
 
 O `bastion` é definido por último no `Vagrantfile` porque precisa das chaves privadas das
-outras VMs (em `.vagrant/machines`, montado em `/home/vagrant/machines`).
+outras VMs (em `.vagrant/machines`, montado em `/home/vagrant/machines`). As demais seguem a
+ordem `k3s-worker`, `auxiliary`, `k3s-server` (ver "Retomada rápida" abaixo).
 
 Reaplicar o playbook (idempotente — a segunda execução termina com `changed=0`):
 
@@ -90,9 +91,11 @@ tp2/
 │   ├── 02-pvc.yaml
 │   ├── 03-deployment.yaml   (postgres + tp2-api)
 │   └── 04-service.yaml      (postgres ClusterIP + tp2-api NodePort 30080)
-├── scripts/              testes A–D da apresentação
+├── scripts/              testes A–D da apresentação + medir-resume.sh
 ├── data_backup/          synced_folder da VM 4 (conteúdo não versionado)
-└── docs/relatorio_tecnico.pdf
+└── docs/
+    ├── relatorio_tecnico.pdf
+    └── logs-testes/       saída de todas as execuções de teste (índice em README.md)
 ```
 
 ## Aplicação
@@ -153,14 +156,30 @@ curl -s -X POST -H 'Content-Type: application/json' -d '{"message":"oi"}' http:/
 - **VRRP unicast.** Os dois proxies anunciam diretamente um ao outro (`unicast_peer`), sem
   depender de multicast na rede host-only do VirtualBox.
 - **Health check sem `weight` (estado FAULT).** O `check_nginx.sh` roda a cada 1 s
-  (`fall 1`). Se o Nginx do bastion falha, a instância entra em FAULT, solta o VIP e anuncia
-  prioridade 0, e a VM 4 vira MASTER na hora: 1,1–1,4 s medidos entre o `systemctl stop nginx`
-  e o VIP na VM 4. A primeira versão usava `weight -20` (101 → 81), mas o BACKUP descarta
+  (`fall 1`, `timeout 3`). Se o Nginx do bastion falha, a instância entra em FAULT, solta o VIP e anuncia
+  prioridade 0, e a VM 4 vira MASTER na hora: 0,6–1,4 s medidos entre o `systemctl stop nginx`
+  e o VIP na VM 4. O `timeout 3` existe porque o padrão (igual ao `interval`, 1 s) estourava
+  com o bastion ocupado rodando o Ansible e causava failover falso; um Nginx parado faz o
+  script falhar na hora, então isso não atrasa o failover real. A primeira versão usava `weight -20` (101 → 81), mas o BACKUP descarta
   anúncios de prioridade menor e só assume após o `master_down_interval`: ~4 s, acima dos
   3 s do roteiro. Quando o Nginx volta, o bastion retoma o VIP (preempção padrão).
 - **Banco separado da API.** Com `local-path` o volume pertence a um único nó, então o
   PVC fica só no PostgreSQL (1 réplica). As 2 réplicas da API são *stateless* e se
-  espalham pelos dois nós via `topologySpreadConstraints`.
+  espalham pelos dois nós via `topologySpreadConstraints` com `DoNotSchedule` (com
+  `ScheduleAnyway` o scheduler chegou a colocar as duas no mesmo nó após um rollout).
+- **Service do banco com IP fixo (10.43.0.100).** A API conecta no banco por esse IP em vez
+  do nome `postgres`. O nome dependia do CoreDNS, que roda no k3s-server: com o server ainda
+  pausado, a API no worker falhava com `lookup postgres: i/o timeout`.
+- **Retomada rápida (ordem das VMs).** O `vagrant resume` retoma uma VM por vez, esperando o
+  SSH de cada uma (12–33 s por VM neste host). Com a ordem `k3s-worker` → `auxiliary` →
+  `k3s-server` → `bastion`, o serviço volta assim que as duas primeiras retomam: o worker
+  tem o banco e uma réplica da API, e a auxiliary assume o VIP enquanto o bastion não volta.
+  Com a ordem anterior (server primeiro) a API levou 61–80 s em 12/11; com a nova, 38–52 s.
+  `scripts/medir-resume.sh` mostra quando cada VM e o VIP voltam.
+- **Atualizações automáticas do Ubuntu desativadas.** `apt-daily`, `apt-daily-upgrade` e
+  `unattended-upgrades` disparavam logo após um resume/up depois de uma pausa longa e
+  saturavam as VMs de 1 vCPU (carga > 4 na auxiliary, SSH estourando o tempo). As
+  atualizações são feitas pelo Ansible.
 - **Firewall.** O UFW nega entrada por padrão; libera 22 em todos, 80 e VRRP nos proxies,
   6443 do bastion para o server, 30080 dos proxies para os nós K3s e tráfego entre os nós e
   as redes de pods/serviços (10.42/16, 10.43/16). Limitação conhecida: o kube-proxy insere
@@ -176,7 +195,8 @@ curl -s -X POST -H 'Content-Type: application/json' -d '{"message":"oi"}' http:/
   tarefa roda em `async`, seguida de `meta: reset_connection` e `async_status`.
 - **Secret com `data` (base64).** Com `stringData` o `kubectl apply` sempre responde
   `configured`, o que quebra o `changed=0`.
-- **Idempotência.** O K3s só é instalado se a unit não existir; a imagem só é recompilada
+- **Idempotência.** O K3s só é instalado se a unit não existir; a atualização do cache do
+  apt não conta como mudança (`changed_when: false`); a imagem só é recompilada
   quando o hash de `main.go`/`go.mod`/`Dockerfile` muda; o `kubectl apply` só reporta
   `changed` quando algum objeto não está `unchanged`.
 - **Retomada sem reprovisionamento.** `k3s`, `k3s-agent`, `nginx`, `keepalived` e o timer de

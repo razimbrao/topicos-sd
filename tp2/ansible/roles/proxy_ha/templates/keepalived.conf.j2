@@ -7,6 +7,10 @@ global_defs {
 vrrp_script check_nginx {
     script "/usr/local/bin/check_nginx.sh"
     interval 1
+    # O padrao de timeout e o proprio interval (1 s): com o bastion (1 vCPU)
+    # ocupado rodando o Ansible o script estourava o tempo e gerava failover
+    # falso. Nginx parado de verdade falha na hora, entao isso nao atrasa o B.
+    timeout 3
     fall 1
     rise 2
     # Sem "weight": se o Nginx falha a instancia entra em FAULT, solta o VIP na

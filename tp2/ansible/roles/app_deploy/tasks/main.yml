@@ -67,10 +67,12 @@
   register: kubectl_apply
   changed_when: kubectl_apply.stdout_lines | reject('search', ' unchanged$') | list | length > 0
 
-- name: Reinicia a API quando a imagem mudou (a tag e fixa)
+- name: Reinicia a API quando a imagem ou o ConfigMap mudou (envFrom so e lido no inicio do pod)
   ansible.builtin.command: kubectl rollout restart deployment/tp2-api
   become: false
-  when: image_copy.changed and 'deployment.apps/tp2-api created' not in kubectl_apply.stdout
+  when:
+    - image_copy.changed or 'configmap/app-config configured' in kubectl_apply.stdout
+    - "'deployment.apps/tp2-api created' not in kubectl_apply.stdout"
 
 - name: Aguarda o rollout do banco e da API
   ansible.builtin.command: "kubectl rollout status deployment/{{ item }} --timeout=300s"
