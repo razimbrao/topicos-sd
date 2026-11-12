@@ -1,0 +1,15 @@
+>>> gravando: registro-teste-c-1794329258
+{"id":2,"message":"registro-teste-c-1794329258","pod":"tp2-api-7598cc9988-wq64w","created_at":"2026-11-10T16:47:38.800488Z"}
+==> k3s-server: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+==> k3s-worker: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+>>> API respondendo pelo VIP 108s apos o inicio da retomada
+==> auxiliary: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+==> bastion: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+>>> comando vagrant concluido em 145s
+{"db":"ok","env":"production","node":"k3s-worker","pod":"tp2-api-7598cc9988-rpg9f","records":2,"time":"2026-11-10T16:50:36Z"}
+OK: registro 'registro-teste-c-1794329258' preservado
+NAME                        READY   STATUS    RESTARTS       AGE     IP          NODE         NOMINATED NODE   READINESS GATES
+postgres-674c8fc76d-7trgc   1/1     Running   1 (79s ago)    7m46s   10.42.1.6   k3s-worker   <none>           <none>
+tp2-api-7598cc9988-rpg9f    1/1     Running   1 (79s ago)    7m46s   10.42.1.5   k3s-worker   <none>           <none>
+tp2-api-7598cc9988-wq64w    1/1     Running   1 (113s ago)   5m18s   10.42.0.9   k3s-server   <none>           <none>
+    inet 192.168.56.254/24 scope global secondary enp0s8

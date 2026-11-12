@@ -1,0 +1,13 @@
+teste-A: 6s
+teste-D: 8s
+teste-B: 31s
+teste-C-suspend: 128s
+teste-C-halt: 184s
+
+Resultados medidos (configuracao final, 12/11/2026)
+- Idempotencia (vagrant provision bastion): changed=0 nas 4 VMs, 38 s  -> 2026-11-12-reexecucao/07-idempotencia-final.log
+- Teste A: 10 consultas, 6 no k3s-server e 4 no k3s-worker, todas proxy=bastion
+- Teste D: 2/2 replicas prontas novamente em 3 s
+- Teste B: Nginx parado 14:44:58.261 -> VM 4 MASTER 14:44:58.834 = 0,57 s; 1 requisicao perdida
+- Teste C suspend/resume: API pelo VIP em 51 s (vagrant resume termina em 70 s); registro preservado
+- Teste C halt/up: API pelo VIP em 127 s (vagrant up termina em 152 s); registro preservado

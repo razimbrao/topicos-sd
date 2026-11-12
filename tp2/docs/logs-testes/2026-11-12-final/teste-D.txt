@@ -1,0 +1,10 @@
+>>> antes:
+NAME                       READY   STATUS    RESTARTS   AGE     IP           NODE         NOMINATED NODE   READINESS GATES
+tp2-api-5bff856bb9-46k55   1/1     Running   0          9m50s   10.42.0.20   k3s-server   <none>           <none>
+tp2-api-5bff856bb9-zqscj   1/1     Running   0          9m44s   10.42.1.15   k3s-worker   <none>           <none>
+>>> 14:44:45 apagando pod/tp2-api-5bff856bb9-46k55
+pod "tp2-api-5bff856bb9-46k55" deleted
+>>> 2/2 replicas prontas novamente em 3s
+NAME                       READY   STATUS    RESTARTS   AGE     IP           NODE         NOMINATED NODE   READINESS GATES
+tp2-api-5bff856bb9-p77r8   1/1     Running   0          3s      10.42.0.21   k3s-server   <none>           <none>
+tp2-api-5bff856bb9-zqscj   1/1     Running   0          9m47s   10.42.1.15   k3s-worker   <none>           <none>

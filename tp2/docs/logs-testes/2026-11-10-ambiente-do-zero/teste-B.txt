@@ -1,0 +1,62 @@
+13:44:39.860 HTTP=200 proxy=bastion
+13:44:40.350 HTTP=200 proxy=bastion
+13:44:40.839 HTTP=200 proxy=bastion
+13:44:41.328 HTTP=200 proxy=bastion
+13:44:41.819 HTTP=200 proxy=bastion
+13:44:42.308 HTTP=200 proxy=bastion
+13:44:42.800 HTTP=200 proxy=bastion
+13:44:43.293 HTTP=200 proxy=bastion
+13:44:43.787 HTTP=200 proxy=bastion
+13:44:44.278 HTTP=200 proxy=bastion
+>>> 13:44:44.736 parando nginx no bastion
+13:44:44.768 HTTP=200 proxy=bastion
+13:44:45.265 HTTP=200 proxy=bastion
+13:44:45.765 HTTP=200 proxy=bastion
+13:44:46.265 HTTP=200 proxy=bastion
+13:44:46.764 HTTP=200 proxy=bastion
+13:44:47.268 HTTP=200 proxy=bastion
+13:44:47.771 HTTP=200 proxy=bastion
+13:44:48.271 HTTP=200 proxy=bastion
+13:44:48.769 HTTP=200 proxy=bastion
+13:44:49.272 HTTP=200 proxy=bastion
+13:44:50.765 HTTP=000 proxy=-
+13:44:51.251 HTTP=200 proxy=auxiliary
+13:44:51.741 HTTP=200 proxy=auxiliary
+13:44:52.232 HTTP=200 proxy=auxiliary
+13:44:52.723 HTTP=200 proxy=auxiliary
+13:44:53.217 HTTP=200 proxy=auxiliary
+13:44:53.709 HTTP=200 proxy=auxiliary
+13:44:54.196 HTTP=200 proxy=auxiliary
+13:44:54.688 HTTP=200 proxy=auxiliary
+13:44:55.181 HTTP=200 proxy=auxiliary
+13:44:55.673 HTTP=200 proxy=auxiliary
+13:44:56.168 HTTP=200 proxy=auxiliary
+13:44:56.656 HTTP=200 proxy=auxiliary
+13:44:57.148 HTTP=200 proxy=auxiliary
+>>> VIP na VM 4:
+13:44:57.645 HTTP=200 proxy=auxiliary
+13:44:58.143 HTTP=200 proxy=auxiliary
+13:44:58.641 HTTP=200 proxy=auxiliary
+13:44:59.146 HTTP=200 proxy=auxiliary
+13:44:59.645 HTTP=200 proxy=auxiliary
+13:45:00.184 HTTP=200 proxy=auxiliary
+13:45:00.685 HTTP=200 proxy=auxiliary
+13:45:01.184 HTTP=200 proxy=auxiliary
+13:45:01.686 HTTP=200 proxy=auxiliary
+    inet 192.168.56.254/24 scope global secondary enp0s8
+13:45:02.176 HTTP=200 proxy=auxiliary
+13:45:02.664 HTTP=200 proxy=auxiliary
+13:45:03.154 HTTP=200 proxy=auxiliary
+13:45:03.642 HTTP=200 proxy=auxiliary
+13:45:04.133 HTTP=200 proxy=auxiliary
+>>> 13:45:05.910 religando nginx no bastion (VIP volta ao MASTER)
+
+Falhas durante o teste: 1
+Respostas por proxy:
+      1 proxy=-
+     27 proxy=auxiliary
+     20 proxy=bastion
+Nov 10 13:44:49.401916 bastion systemd[1]: Stopped A high performance web server and a reverse proxy server.
+Nov 10 13:44:49.884250 bastion Keepalived_vrrp[5968]: (VI_1) Entering FAULT STATE
+Nov 10 13:44:50.496729 auxiliary Keepalived_vrrp[4159]: (VI_1) Entering MASTER STATE
+Nov 10 13:45:15.499743 auxiliary Keepalived_vrrp[4159]: (VI_1) Entering BACKUP STATE

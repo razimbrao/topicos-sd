@@ -1,0 +1,293 @@
+==> bastion: Running provisioner: ansible_local...
+    bastion: Running ansible-playbook...
+
+PLAY [Base comum, /etc/hosts e firewall] ***************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k3s-server]
+ok: [k3s-worker]
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [common : Atualiza o cache do apt] ****************************************
+ok: [k3s-server]
+ok: [auxiliary]
+ok: [k3s-worker]
+ok: [bastion]
+
+TASK [common : Instala utilitarios de diagnostico] *****************************
+ok: [k3s-server]
+ok: [k3s-worker]
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [common : Define o fuso horario] ******************************************
+ok: [k3s-worker]
+ok: [k3s-server]
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [common : Mapeia todos os nos e o VIP no /etc/hosts] **********************
+ok: [k3s-worker]
+ok: [k3s-server]
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [common : Habilita o encaminhamento IPv4 (exigido pelo K3s e pelo VRRP)] ***
+ok: [k3s-server]
+ok: [k3s-worker]
+ok: [bastion]
+ok: [auxiliary]
+
+TASK [common : Firewall - nega entrada por padrao] *****************************
+ok: [auxiliary]
+ok: [bastion]
+ok: [k3s-server]
+ok: [k3s-worker]
+
+TASK [common : Firewall - libera saida] ****************************************
+ok: [bastion]
+ok: [auxiliary]
+ok: [k3s-worker]
+ok: [k3s-server]
+
+TASK [common : Firewall - trafego roteado (pods/flannel nos nos K3s, nega nos demais)] ***
+ok: [auxiliary]
+ok: [bastion]
+ok: [k3s-worker]
+ok: [k3s-server]
+
+TASK [common : Firewall - SSH] *************************************************
+ok: [auxiliary]
+ok: [k3s-server]
+ok: [k3s-worker]
+ok: [bastion]
+
+TASK [common : Firewall - HTTP nos proxies] ************************************
+skipping: [k3s-server]
+skipping: [k3s-worker]
+ok: [bastion]
+ok: [auxiliary]
+
+TASK [common : Firewall - VRRP (protocolo 112) vindo do outro proxy] ***********
+skipping: [k3s-server]
+skipping: [k3s-worker]
+ok: [bastion]
+ok: [auxiliary]
+
+TASK [common : Firewall - comunicacao irrestrita entre os nos do cluster e redes de pods/servicos] ***
+skipping: [bastion] => (item=192.168.56.20) 
+skipping: [bastion] => (item=192.168.56.30) 
+skipping: [auxiliary] => (item=192.168.56.20) 
+skipping: [bastion] => (item=10.42.0.0/16) 
+skipping: [auxiliary] => (item=192.168.56.30) 
+skipping: [bastion] => (item=10.43.0.0/16) 
+skipping: [auxiliary] => (item=10.42.0.0/16) 
+skipping: [bastion]
+skipping: [auxiliary] => (item=10.43.0.0/16) 
+skipping: [auxiliary]
+ok: [k3s-server] => (item=192.168.56.20)
+ok: [k3s-worker] => (item=192.168.56.20)
+ok: [k3s-server] => (item=192.168.56.30)
+ok: [k3s-worker] => (item=192.168.56.30)
+ok: [k3s-server] => (item=10.42.0.0/16)
+ok: [k3s-worker] => (item=10.42.0.0/16)
+ok: [k3s-server] => (item=10.43.0.0/16)
+ok: [k3s-worker] => (item=10.43.0.0/16)
+
+TASK [common : Firewall - API do Kubernetes para o bastion (kubectl)] **********
+skipping: [bastion]
+skipping: [auxiliary]
+skipping: [k3s-worker]
+ok: [k3s-server]
+
+TASK [common : Firewall - NodePort 30080 para os proxies] **********************
+skipping: [bastion] => (item=bastion) 
+skipping: [bastion] => (item=auxiliary) 
+skipping: [bastion]
+skipping: [auxiliary] => (item=bastion) 
+skipping: [auxiliary] => (item=auxiliary) 
+skipping: [auxiliary]
+ok: [k3s-worker] => (item=bastion)
+ok: [k3s-server] => (item=bastion)
+ok: [k3s-worker] => (item=auxiliary)
+ok: [k3s-server] => (item=auxiliary)
+
+TASK [common : Firewall - ativa (e habilita no boot)] **************************
+ok: [k3s-worker]
+ok: [k3s-server]
+ok: [bastion]
+ok: [auxiliary]
+
+TASK [common : Firewall - reabre a conexao SSH] ********************************
+[WARNING]: Reset is not implemented for this connection
+
+TASK [common : Firewall - reabre a conexao SSH] ********************************
+
+TASK [common : Firewall - reabre a conexao SSH] ********************************
+
+TASK [common : Firewall - reabre a conexao SSH] ********************************
+
+TASK [common : Firewall - confere a ativacao] **********************************
+ok: [bastion]
+ok: [k3s-worker]
+ok: [k3s-server]
+ok: [auxiliary]
+
+PLAY [Proxy reverso redundante (Nginx + Keepalived, VIP 192.168.56.254)] *******
+
+TASK [Gathering Facts] *********************************************************
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Instala Nginx e Keepalived] ***********************************
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Permite bind em IP nao local (VIP ainda ausente no BACKUP)] ***
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Script de health check do Nginx] ******************************
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Configuracao do Keepalived (VRRP)] ****************************
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Site do proxy reverso para o cluster K3s] *********************
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Habilita o site k3s-app] **************************************
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Remove o site default] ****************************************
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [proxy_ha : Habilita e inicia nginx e keepalived (sobem sozinhos no boot)] ***
+ok: [auxiliary] => (item=nginx)
+ok: [auxiliary] => (item=keepalived)
+ok: [bastion] => (item=nginx)
+ok: [bastion] => (item=keepalived)
+
+PLAY [K3s control plane] *******************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k3s-server]
+
+TASK [k3s_server : Diretorio de configuracao do K3s] ***************************
+ok: [k3s-server]
+
+TASK [k3s_server : Configuracao do K3s server (IP e flannel na rede privada)] ***
+ok: [k3s-server]
+
+TASK [k3s_server : Instala o K3s server (versao fixa)] *************************
+ok: [k3s-server]
+
+TASK [k3s_server : Aplica mudancas de configuracao antes de seguir] ************
+
+TASK [k3s_server : Habilita e inicia o k3s (sobe sozinho no boot)] *************
+ok: [k3s-server]
+
+TASK [k3s_server : Aguarda o token de juncao do cluster] ***********************
+ok: [k3s-server]
+
+TASK [k3s_server : Le o token de juncao] ***************************************
+ok: [k3s-server]
+
+TASK [k3s_server : Publica o token como fato para o k3s_agent] *****************
+ok: [k3s-server]
+
+TASK [k3s_server : Le o kubeconfig gerado pelo K3s] ****************************
+ok: [k3s-server]
+
+TASK [k3s_server : Cria ~/.kube no bastion] ************************************
+ok: [k3s-server -> bastion(192.168.56.10)]
+
+TASK [k3s_server : Exporta o kubeconfig para o bastion apontando para o IP do server] ***
+ok: [k3s-server -> bastion(192.168.56.10)]
+
+PLAY [K3s worker] **************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k3s-worker]
+
+TASK [k3s_agent : Diretorio de configuracao do K3s] ****************************
+ok: [k3s-worker]
+
+TASK [k3s_agent : Configuracao do K3s agent (IP e flannel na rede privada)] ****
+ok: [k3s-worker]
+
+TASK [k3s_agent : Instala o K3s agent e associa ao control plane] **************
+ok: [k3s-worker]
+
+TASK [k3s_agent : Habilita e inicia o k3s-agent (sobe sozinho no boot)] ********
+ok: [k3s-worker]
+
+PLAY [Build da imagem e deploy dos manifestos (a partir do bastion)] ***********
+
+TASK [Gathering Facts] *********************************************************
+ok: [bastion]
+
+TASK [app_deploy : Instala o podman (build de imagens sem daemon)] *************
+ok: [bastion]
+
+TASK [app_deploy : Instala o kubectl na mesma versao do cluster] ***************
+ok: [bastion]
+
+TASK [app_deploy : Calcula a versao do codigo da aplicacao] ********************
+ok: [bastion]
+
+TASK [app_deploy : Diretorio dos artefatos de imagem] **************************
+ok: [bastion]
+
+TASK [app_deploy : Build multi-stage da imagem e exportacao para tar (so quando o codigo muda)] ***
+ok: [bastion]
+
+TASK [app_deploy : Garante o diretorio de imagens do K3s nos nos] **************
+ok: [bastion -> k3s-server(192.168.56.20)] => (item=k3s-server)
+ok: [bastion -> k3s-worker(192.168.56.30)] => (item=k3s-worker)
+
+TASK [app_deploy : Copia a imagem para os nos do cluster (diretorio de auto-import do K3s)] ***
+ok: [bastion -> k3s-server(192.168.56.20)] => (item=k3s-server)
+ok: [bastion -> k3s-worker(192.168.56.30)] => (item=k3s-worker)
+
+TASK [app_deploy : Importa a imagem no containerd dos nos que receberam versao nova] ***
+skipping: [bastion] => (item=k3s-server) 
+skipping: [bastion] => (item=k3s-worker) 
+skipping: [bastion]
+
+TASK [app_deploy : Aguarda os dois nos ficarem Ready] **************************
+ok: [bastion]
+
+TASK [app_deploy : Aplica os manifestos (kubectl apply e declarativo e idempotente)] ***
+changed: [bastion]
+
+TASK [app_deploy : Reinicia a API quando a imagem ou o ConfigMap mudou (envFrom so e lido no inicio do pod)] ***
+skipping: [bastion]
+
+TASK [app_deploy : Aguarda o rollout do banco e da API] ************************
+ok: [bastion] => (item=postgres)
+ok: [bastion] => (item=tp2-api)
+
+PLAY [Backup periodico dos registros no volume sincronizado da VM 4] ***********
+
+TASK [Gathering Facts] *********************************************************
+fatal: [auxiliary]: UNREACHABLE! => changed=false 
+  msg: |-
+    Data could not be sent to remote host "192.168.56.40". Make sure this host can be reached over ssh: Connection timed out during banner exchange
+    Connection to 192.168.56.40 port 22 timed out
+  unreachable: true
+
+PLAY RECAP *********************************************************************
+auxiliary                  : ok=23   changed=0    unreachable=1    failed=0    skipped=3    rescued=0    ignored=0   
+bastion                    : ok=34   changed=1    unreachable=0    failed=0    skipped=5    rescued=0    ignored=0   
+k3s-server                 : ok=26   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+k3s-worker                 : ok=19   changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
+
+Ansible failed to complete successfully. Any error output should be
+visible above. Please fix these errors and try again.
