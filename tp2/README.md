@@ -40,8 +40,10 @@ sem reprovisionar.
 
 ## Pré-requisitos
 
-VirtualBox 7.x, Vagrant 2.4.x e acesso à internet (pacotes, K3s, imagens base). O Ansible
-**não** roda no host: ele é instalado no `bastion`, que provisiona as demais VMs.
+VirtualBox 7.x e Vagrant 2.4.x. **Não é preciso acesso à internet:** a box usada pelas quatro
+VMs está versionada no próprio repositório (ver "Box do TP2" abaixo) e já traz o Ansible,
+os pacotes, o K3s e as imagens de container. O Ansible **não** roda no host: ele já vem
+instalado no `bastion`, que provisiona as demais VMs.
 
 > As VMs do TP1 usam os mesmos IPs (.10/.20/.30). Elas precisam estar desligadas.
 
@@ -52,6 +54,11 @@ cd tp2
 vagrant up                      # cria as 4 VMs; o bastion sobe por último e roda o site.yml
 curl http://192.168.56.254/info
 ```
+
+No primeiro `vagrant up` o Vagrantfile remonta a box a partir de `box/parts/`, confere o
+SHA-256 e a registra no Vagrant local (`dcc091a-tp2-jammy-<versão>`). Nas execuções
+seguintes esse passo é pulado. As VMs são criadas como *linked clones*: o disco da box é
+importado uma única vez e cada VM grava só as diferenças.
 
 O `bastion` é definido por último no `Vagrantfile` porque precisa das chaves privadas das
 outras VMs (em `.vagrant/machines`, montado em `/home/vagrant/machines`). As demais seguem a
@@ -69,11 +76,41 @@ Usar o kubectl do bastion (kubeconfig exportado pelo papel `k3s_server`):
 vagrant ssh bastion -c "kubectl get nodes,pods -o wide"
 ```
 
+## Box do TP2
+
+Documentação completa em [`box/README.md`](box/README.md).
+
+Todas as VMs usam a mesma box, gerada a partir da `ubuntu/jammy64` por
+[`box/build-box.sh`](box/build-box.sh). O script sobe uma VM temporária, roda
+[`box/bake.sh`](box/bake.sh), empacota com `vagrant package` e divide o arquivo em partes de
+90 MB (o GitHub recusa arquivos acima de 100 MB). A box já contém:
+
+- os pacotes usados pelos papéis: Ansible (PPA oficial), Nginx, Keepalived, Podman, UFW,
+  curl, jq, htop, tcpdump e dnsutils. Nginx e Keepalived vêm desabilitados e o papel
+  `proxy_ha` os liga só nos proxies;
+- o K3s `v1.31.4+k3s1` (binário, `install.sh` e o pacote airgap de imagens do sistema) e o
+  `kubectl` da mesma versão, em `/opt/tp2-box`;
+- as imagens `postgres:16-alpine` (tar importado pelo containerd dos nós K3s) e
+  `golang:1.22-alpine` (no Podman, para o build multi-stage).
+
+As dependências Go da API ficam vendorizadas em `app/vendor`, então o build também não acessa
+a internet.
+
+Para gerar uma box nova (por exemplo, ao trocar a versão do K3s em `bake.sh` e no
+inventário), incremente `box/VERSION` e rode:
+
+```bash
+cd tp2/box && bash build-box.sh
+```
+
+Só esse passo precisa de internet. Depois, faça commit de `box/parts/` e `box/VERSION`.
+
 ## Estrutura
 
 ```
 tp2/
 ├── Vagrantfile
+├── box/                  box única das VMs: bake.sh, build-box.sh, VERSION e parts/ (≈90 MB cada)
 ├── ansible/
 │   ├── ansible.cfg
 │   ├── inventory/hosts.yml
@@ -85,7 +122,7 @@ tp2/
 │       ├── k3s_agent/    instala o agent e junta ao server com o token
 │       ├── app_deploy/   build multi-stage (podman), distribui a imagem, kubectl apply
 │       └── backup_sync/  timer na VM 4 que salva /records em ./data_backup
-├── app/                  API em Go (main.go, go.mod, Dockerfile multi-stage)
+├── app/                  API em Go (main.go, go.mod, vendor/, Dockerfile multi-stage)
 ├── k3s/
 │   ├── 01-configmap-secret.yaml
 │   ├── 02-pvc.yaml
@@ -131,7 +168,7 @@ Resultados medidos em um ambiente recriado do zero (detalhes em
 
 | Teste | Resultado |
 |---|---|
-| `vagrant up` do zero | 11 min 46 s, `failed=0` |
+| `vagrant up` do zero | 7 min 40 s com a box do TP2, incluindo montar e importar a box na 1ª vez (antes: 11 min 46 s com `ubuntu/jammy64`); `failed=0` |
 | Idempotência | 2ª execução com `changed=0` nas 4 VMs |
 | A | 10 consultas: 6 no pod do k3s-worker, 4 no do k3s-server |
 | B | VIP na VM 4 em 1,09 s; 1 de 48 requisições perdida (a que estava em curso) |
@@ -150,7 +187,7 @@ curl -s -X POST -H 'Content-Type: application/json' -d '{"message":"oi"}' http:/
 
 ## Decisões técnicas
 
-- **Interface `enp0s8`, não `eth1`.** A box `ubuntu/jammy64` usa nomes previsíveis; a rede
+- **Interface `enp0s8`, não `eth1`.** A box (derivada da `ubuntu/jammy64`) usa nomes previsíveis; a rede
   host-only é a `enp0s8`. Keepalived e `--flannel-iface` apontam para ela; com `eth1` o VIP
   não sobe e o flannel usa a NAT (onde todas as VMs têm o mesmo IP 10.0.2.15).
 - **VRRP unicast.** Os dois proxies anunciam diretamente um ao outro (`unicast_peer`), sem

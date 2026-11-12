@@ -12,10 +12,27 @@
     mode: "0600"
   notify: Reinicia k3s
 
+- name: Diretorio de imagens do K3s (importadas automaticamente na partida)
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/agent/images
+    state: directory
+    mode: "0755"
+
+- name: Imagens pre-carregadas na box (sistema do K3s e postgres), sem acesso a registry
+  ansible.builtin.copy:
+    src: "{{ box_assets }}/{{ item }}"
+    dest: "/var/lib/rancher/k3s/agent/images/{{ item }}"
+    remote_src: true
+    mode: "0644"
+  loop:
+    - k3s-airgap-images-amd64.tar.zst
+    - postgres-16-alpine.tar
+
 - name: Instala o K3s server (versao fixa)
   ansible.builtin.shell: >
-    curl -sfL https://get.k3s.io |
-    INSTALL_K3S_VERSION="{{ k3s_version }}" INSTALL_K3S_EXEC="server" sh -
+    INSTALL_K3S_SKIP_DOWNLOAD=true
+    INSTALL_K3S_VERSION="{{ k3s_version }}" INSTALL_K3S_EXEC="server"
+    {{ box_assets }}/k3s-install.sh
   args:
     creates: /etc/systemd/system/k3s.service
 

@@ -1,0 +1,26 @@
+# Builder da box do TP2 (usado apenas por build-box.sh).
+#
+# Sobe uma VM temporaria a partir da ubuntu/jammy64 oficial, roda bake.sh para
+# deixar dentro dela tudo o que o provisionamento do TP2 precisaria baixar da
+# internet, e depois e empacotada com `vagrant package`.
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.box_version = "20241002.0.0"
+  config.vm.boot_timeout = 900
+
+  # Mantem a chave insegura padrao do Vagrant: a box gerada precisa aceita-la
+  # para que o `vagrant up` do TP2 consiga o primeiro acesso SSH.
+  config.ssh.insert_key = false
+
+  config.vm.define "tp2-box-builder" do |b|
+    b.vm.hostname = "tp2-box-builder"
+    b.vm.synced_folder ".", "/vagrant", disabled: true
+    b.vm.provider "virtualbox" do |v|
+      v.name   = "dcc091a-tp2-box-builder"
+      v.cpus   = 2
+      v.memory = 2048
+    end
+    b.vm.provision "shell", path: "bake.sh"
+  end
+end

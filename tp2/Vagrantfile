@@ -15,9 +15,59 @@ NODES = {
   "k3s-server" => { ip: "192.168.56.20", cpus: 2, memory: 2048, vb: "dcc091a-vm2-k3s-server" },
 }
 
+require "digest"
+require "fileutils"
+
+# Box unica do TP2, versionada no proprio repositorio (tp2/box/parts) em partes
+# de 90 MB. Ela ja traz pacotes, K3s airgap, kubectl e imagens de container
+# (ver tp2/box/bake.sh), entao nem o Vagrant Cloud nem o provisionamento
+# dependem de servicos externos.
+BOX_DIR     = File.join(__dir__, "box")
+BOX_VERSION = File.read(File.join(BOX_DIR, "VERSION")).strip
+BOX_NAME    = "dcc091a-tp2-jammy-#{BOX_VERSION}"
+BOX_FILE    = "tp2-jammy-#{BOX_VERSION}.box"
+
+# Remonta o arquivo .box a partir das partes, so quando a box ainda nao foi
+# registrada no Vagrant desta maquina (nas demais execucoes nao custa nada).
+def tp2_box_url
+  vagrant_home = ENV["VAGRANT_HOME"] || File.join(Dir.home, ".vagrant.d")
+  return nil if Dir.exist?(File.join(vagrant_home, "boxes", BOX_NAME))
+
+  parts = Dir.glob(File.join(BOX_DIR, "parts", "#{BOX_FILE}.[0-9][0-9][0-9]")).sort
+  # Sem abort: comandos como status/destroy/halt precisam funcionar mesmo sem a box.
+  if parts.empty?
+    warn "AVISO: partes da box nao encontradas em #{BOX_DIR}/parts (rode box/build-box.sh)"
+    return nil
+  end
+
+  out = File.join(__dir__, ".vagrant", "box", BOX_FILE)
+  expected = File.read(File.join(BOX_DIR, "parts", "#{BOX_FILE}.sha256")).strip
+  unless File.exist?(out) && Digest::SHA256.file(out).hexdigest == expected
+    FileUtils.mkdir_p(File.dirname(out))
+    puts "==> Montando #{BOX_FILE} a partir de #{parts.size} partes..."
+    File.open(out, "wb") do |f|
+      parts.each { |p| File.open(p, "rb") { |src| IO.copy_stream(src, f) } }
+    end
+    unless Digest::SHA256.file(out).hexdigest == expected
+      File.delete(out)
+      warn "AVISO: checksum da box nao confere; partes corrompidas em #{BOX_DIR}/parts"
+      return nil
+    end
+  end
+  "file:///" + File.expand_path(out).sub(%r{\A/}, "")
+end
+
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/jammy64"
+  config.vm.box = BOX_NAME
+  config.vm.box_url = tp2_box_url
+  config.vm.box_check_update = false
   config.vm.boot_timeout = 900
+
+  # Clones vinculados: o disco da box e importado uma unica vez e cada VM grava
+  # apenas as diferencas, em vez de copiar o disco inteiro quatro vezes.
+  config.vm.provider "virtualbox" do |v|
+    v.linked_clone = true
+  end
 
   NODES.each do |name, spec|
     config.vm.define name do |node|

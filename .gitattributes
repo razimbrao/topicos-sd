@@ -1,0 +1,2 @@
+# Partes da box do TP2: binario puro, sem conversao de fim de linha nem diff.
+tp2/box/parts/** -text -diff

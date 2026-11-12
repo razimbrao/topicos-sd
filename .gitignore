@@ -16,3 +16,6 @@ tp2/data_backup/*
 
 # Logs das execucoes de teste do TP2 sao evidencia e devem ser versionados
 !tp2/docs/logs-testes/**
+
+# TP2: a box e versionada em partes (tp2/box/parts); o arquivo .box remontado nao
+tp2/box/*.box

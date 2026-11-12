@@ -7,16 +7,16 @@
     name: podman
     state: present
 
-- name: Instala o kubectl na mesma versao do cluster
-  ansible.builtin.get_url:
-    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
-    checksum: "sha256:https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl.sha256"
+- name: Instala o kubectl na mesma versao do cluster (binario pre-carregado na box)
+  ansible.builtin.copy:
+    src: "{{ box_assets }}/kubectl"
     dest: /usr/local/bin/kubectl
+    remote_src: true
     mode: "0755"
 
 - name: Calcula a versao do codigo da aplicacao
   ansible.builtin.set_fact:
-    app_src_hash: "{{ (lookup('file', '/app/main.go') ~ lookup('file', '/app/go.mod') ~ lookup('file', '/app/Dockerfile')) | hash('sha1') }}"
+    app_src_hash: "{{ (lookup('file', '/app/main.go') ~ lookup('file', '/app/go.mod') ~ lookup('file', '/app/go.sum') ~ lookup('file', '/app/Dockerfile')) | hash('sha1') }}"
 
 - name: Diretorio dos artefatos de imagem
   ansible.builtin.file:

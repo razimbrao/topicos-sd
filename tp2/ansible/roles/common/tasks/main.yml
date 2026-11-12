@@ -1,4 +1,11 @@
 ---
+- name: Verifica se a VM veio da box pre-assada do TP2
+  ansible.builtin.stat:
+    path: /etc/tp2-box-release
+  register: tp2_box_release
+
+# Na box do TP2 todos os pacotes ja estao instalados (tp2/box/bake.sh), entao o
+# indice do apt so e atualizado se a VM vier de outra box.
 - name: Atualiza o cache do apt
   ansible.builtin.apt:
     update_cache: true
@@ -6,6 +13,7 @@
   # Atualizar o indice de pacotes nao altera a configuracao do sistema; sem isso
   # toda execucao depois de 1 h aparece como "changed".
   changed_when: false
+  when: not tp2_box_release.stat.exists
 
 # Os timers de atualizacao automatica disparam logo apos um resume/up depois de
 # uma pausa longa e saturam as VMs de 1 vCPU (carga > 4 na auxiliary, SSH e
