@@ -1,0 +1,458 @@
+Bringing machine 'k3s-server' up with 'virtualbox' provider...
+Bringing machine 'k3s-worker' up with 'virtualbox' provider...
+Bringing machine 'auxiliary' up with 'virtualbox' provider...
+Bringing machine 'bastion' up with 'virtualbox' provider...
+==> k3s-server: Checking if box 'ubuntu/jammy64' version '20241002.0.0' is up to date...
+==> k3s-server: Clearing any previously set forwarded ports...
+==> k3s-server: Clearing any previously set network interfaces...
+==> k3s-server: Preparing network interfaces based on configuration...
+    k3s-server: Adapter 1: nat
+    k3s-server: Adapter 2: hostonly
+==> k3s-server: Forwarding ports...
+    k3s-server: 22 (guest) => 2222 (host) (adapter 1)
+==> k3s-server: Running 'pre-boot' VM customizations...
+==> k3s-server: Booting VM...
+==> k3s-server: Waiting for machine to boot. This may take a few minutes...
+    k3s-server: SSH address: 127.0.0.1:2222
+    k3s-server: SSH username: vagrant
+    k3s-server: SSH auth method: private key
+    k3s-server: 
+    k3s-server: Vagrant insecure key detected. Vagrant will automatically replace
+    k3s-server: this with a newly generated keypair for better security.
+    k3s-server: 
+    k3s-server: Inserting generated public key within guest...
+    k3s-server: Removing insecure key from the guest if it's present...
+    k3s-server: Key inserted! Disconnecting and reconnecting using new SSH key...
+==> k3s-server: Machine booted and ready!
+==> k3s-server: Checking for guest additions in VM...
+    k3s-server: The guest additions on this VM do not match the installed version of
+    k3s-server: VirtualBox! In most cases this is fine, but in rare cases it can
+    k3s-server: prevent things such as shared folders from working properly. If you see
+    k3s-server: shared folder errors, please make sure the guest additions within the
+    k3s-server: virtual machine match the version of VirtualBox you have installed on
+    k3s-server: your host and reload your VM.
+    k3s-server: 
+    k3s-server: Guest Additions Version: 6.0.0 r127566
+    k3s-server: VirtualBox Version: 7.2
+==> k3s-server: Setting hostname...
+==> k3s-server: Configuring and enabling network interfaces...
+==> k3s-server: Mounting shared folders...
+    k3s-server: D:/repositories/topicos-sd/tp2 => /vagrant
+==> k3s-worker: Importing base box 'ubuntu/jammy64'...
+[KProgress: 90%[K==> k3s-worker: Matching MAC address for NAT networking...
+==> k3s-worker: Checking if box 'ubuntu/jammy64' version '20241002.0.0' is up to date...
+==> k3s-worker: Setting the name of the VM: dcc091a-vm3-k3s-worker
+==> k3s-worker: Fixed port collision for 22 => 2222. Now on port 2200.
+==> k3s-worker: Clearing any previously set network interfaces...
+==> k3s-worker: Preparing network interfaces based on configuration...
+    k3s-worker: Adapter 1: nat
+    k3s-worker: Adapter 2: hostonly
+==> k3s-worker: Forwarding ports...
+    k3s-worker: 22 (guest) => 2200 (host) (adapter 1)
+==> k3s-worker: Running 'pre-boot' VM customizations...
+==> k3s-worker: Booting VM...
+==> k3s-worker: Waiting for machine to boot. This may take a few minutes...
+    k3s-worker: SSH address: 127.0.0.1:2200
+    k3s-worker: SSH username: vagrant
+    k3s-worker: SSH auth method: private key
+    k3s-worker: Warning: Connection reset. Retrying...
+    k3s-worker: Warning: Connection aborted. Retrying...
+    k3s-worker: 
+    k3s-worker: Vagrant insecure key detected. Vagrant will automatically replace
+    k3s-worker: this with a newly generated keypair for better security.
+    k3s-worker: 
+    k3s-worker: Inserting generated public key within guest...
+    k3s-worker: Removing insecure key from the guest if it's present...
+    k3s-worker: Key inserted! Disconnecting and reconnecting using new SSH key...
+==> k3s-worker: Machine booted and ready!
+==> k3s-worker: Checking for guest additions in VM...
+    k3s-worker: The guest additions on this VM do not match the installed version of
+    k3s-worker: VirtualBox! In most cases this is fine, but in rare cases it can
+    k3s-worker: prevent things such as shared folders from working properly. If you see
+    k3s-worker: shared folder errors, please make sure the guest additions within the
+    k3s-worker: virtual machine match the version of VirtualBox you have installed on
+    k3s-worker: your host and reload your VM.
+    k3s-worker: 
+    k3s-worker: Guest Additions Version: 6.0.0 r127566
+    k3s-worker: VirtualBox Version: 7.2
+==> k3s-worker: Setting hostname...
+==> k3s-worker: Configuring and enabling network interfaces...
+==> k3s-worker: Mounting shared folders...
+    k3s-worker: D:/repositories/topicos-sd/tp2 => /vagrant
+==> auxiliary: Importing base box 'ubuntu/jammy64'...
+[KProgress: 90%[K==> auxiliary: Matching MAC address for NAT networking...
+==> auxiliary: Checking if box 'ubuntu/jammy64' version '20241002.0.0' is up to date...
+==> auxiliary: Setting the name of the VM: dcc091a-vm4-auxiliary
+==> auxiliary: Fixed port collision for 22 => 2222. Now on port 2201.
+==> auxiliary: Clearing any previously set network interfaces...
+==> auxiliary: Preparing network interfaces based on configuration...
+    auxiliary: Adapter 1: nat
+    auxiliary: Adapter 2: hostonly
+==> auxiliary: Forwarding ports...
+    auxiliary: 22 (guest) => 2201 (host) (adapter 1)
+==> auxiliary: Running 'pre-boot' VM customizations...
+==> auxiliary: Booting VM...
+==> auxiliary: Waiting for machine to boot. This may take a few minutes...
+    auxiliary: SSH address: 127.0.0.1:2201
+    auxiliary: SSH username: vagrant
+    auxiliary: SSH auth method: private key
+    auxiliary: 
+    auxiliary: Vagrant insecure key detected. Vagrant will automatically replace
+    auxiliary: this with a newly generated keypair for better security.
+    auxiliary: 
+    auxiliary: Inserting generated public key within guest...
+    auxiliary: Removing insecure key from the guest if it's present...
+    auxiliary: Key inserted! Disconnecting and reconnecting using new SSH key...
+==> auxiliary: Machine booted and ready!
+==> auxiliary: Checking for guest additions in VM...
+    auxiliary: The guest additions on this VM do not match the installed version of
+    auxiliary: VirtualBox! In most cases this is fine, but in rare cases it can
+    auxiliary: prevent things such as shared folders from working properly. If you see
+    auxiliary: shared folder errors, please make sure the guest additions within the
+    auxiliary: virtual machine match the version of VirtualBox you have installed on
+    auxiliary: your host and reload your VM.
+    auxiliary: 
+    auxiliary: Guest Additions Version: 6.0.0 r127566
+    auxiliary: VirtualBox Version: 7.2
+==> auxiliary: Setting hostname...
+==> auxiliary: Configuring and enabling network interfaces...
+==> auxiliary: Mounting shared folders...
+    auxiliary: D:/repositories/topicos-sd/tp2 => /vagrant
+    auxiliary: D:/repositories/topicos-sd/tp2/data_backup => /var/lib/app_data
+==> auxiliary: Detected mount owner ID within mount options. (uid: 1000 guestpath: /var/lib/app_data)
+==> auxiliary: Detected mount group ID within mount options. (gid: 1000 guestpath: /var/lib/app_data)
+==> bastion: Importing base box 'ubuntu/jammy64'...
+[KProgress: 90%[K==> bastion: Matching MAC address for NAT networking...
+==> bastion: Checking if box 'ubuntu/jammy64' version '20241002.0.0' is up to date...
+==> bastion: Setting the name of the VM: dcc091a-vm1-bastion
+==> bastion: Fixed port collision for 22 => 2222. Now on port 2202.
+==> bastion: Clearing any previously set network interfaces...
+==> bastion: Preparing network interfaces based on configuration...
+    bastion: Adapter 1: nat
+    bastion: Adapter 2: hostonly
+==> bastion: Forwarding ports...
+    bastion: 22 (guest) => 2202 (host) (adapter 1)
+==> bastion: Running 'pre-boot' VM customizations...
+==> bastion: Booting VM...
+==> bastion: Waiting for machine to boot. This may take a few minutes...
+    bastion: SSH address: 127.0.0.1:2202
+    bastion: SSH username: vagrant
+    bastion: SSH auth method: private key
+    bastion: 
+    bastion: Vagrant insecure key detected. Vagrant will automatically replace
+    bastion: this with a newly generated keypair for better security.
+    bastion: 
+    bastion: Inserting generated public key within guest...
+    bastion: Removing insecure key from the guest if it's present...
+    bastion: Key inserted! Disconnecting and reconnecting using new SSH key...
+==> bastion: Machine booted and ready!
+==> bastion: Checking for guest additions in VM...
+    bastion: The guest additions on this VM do not match the installed version of
+    bastion: VirtualBox! In most cases this is fine, but in rare cases it can
+    bastion: prevent things such as shared folders from working properly. If you see
+    bastion: shared folder errors, please make sure the guest additions within the
+    bastion: virtual machine match the version of VirtualBox you have installed on
+    bastion: your host and reload your VM.
+    bastion: 
+    bastion: Guest Additions Version: 6.0.0 r127566
+    bastion: VirtualBox Version: 7.2
+==> bastion: Setting hostname...
+==> bastion: Configuring and enabling network interfaces...
+==> bastion: Mounting shared folders...
+    bastion: D:/repositories/topicos-sd/tp2/k3s => /k3s
+    bastion: D:/repositories/topicos-sd/tp2/app => /app
+    bastion: D:/repositories/topicos-sd/tp2/ansible => /ansible
+    bastion: D:/repositories/topicos-sd/tp2 => /vagrant
+    bastion: D:/repositories/topicos-sd/tp2/.vagrant/machines => /home/vagrant/machines
+==> bastion: Running provisioner: bootstrap-ansible (shell)...
+    bastion: Running: script: bootstrap-ansible
+    bastion: Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+    bastion: Get:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB]
+    bastion: Get:3 http://security.ubuntu.com/ubuntu jammy-security InRelease [129 kB]
+    bastion: Get:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [127 kB]
+    bastion: Get:5 http://security.ubuntu.com/ubuntu jammy-security/main amd64 Packages [3700 kB]
+    bastion: Get:6 http://archive.ubuntu.com/ubuntu jammy/universe amd64 Packages [14.1 MB]
+    bastion: Get:7 http://security.ubuntu.com/ubuntu jammy-security/main Translation-en [517 kB]
+    bastion: Get:8 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 Packages [6579 kB]
+    bastion: Get:9 http://archive.ubuntu.com/ubuntu jammy/universe Translation-en [5652 kB]
+    bastion: Get:10 http://archive.ubuntu.com/ubuntu jammy/universe amd64 c-n-f Metadata [286 kB]
+    bastion: Get:11 http://archive.ubuntu.com/ubuntu jammy/multiverse amd64 Packages [217 kB]
+    bastion: Get:12 http://archive.ubuntu.com/ubuntu jammy/multiverse Translation-en [112 kB]
+    bastion: Get:13 http://archive.ubuntu.com/ubuntu jammy/multiverse amd64 c-n-f Metadata [8372 B]
+    bastion: Get:14 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 Packages [3979 kB]
+    bastion: Get:15 http://security.ubuntu.com/ubuntu jammy-security/restricted Translation-en [1265 kB]
+    bastion: Get:16 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 Packages [1057 kB]
+    bastion: Get:17 http://security.ubuntu.com/ubuntu jammy-security/universe Translation-en [238 kB]
+    bastion: Get:18 http://archive.ubuntu.com/ubuntu jammy-updates/main Translation-en [583 kB]
+    bastion: Get:19 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 c-n-f Metadata [23.2 kB]
+    bastion: Get:20 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 Packages [79.6 kB]
+    bastion: Get:21 http://archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 Packages [6843 kB]
+    bastion: Get:22 http://security.ubuntu.com/ubuntu jammy-security/multiverse Translation-en [13.6 kB]
+    bastion: Get:23 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 c-n-f Metadata [544 B]
+    bastion: Get:24 http://archive.ubuntu.com/ubuntu jammy-updates/restricted Translation-en [1314 kB]
+    bastion: Get:25 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [1291 kB]
+    bastion: Get:26 http://archive.ubuntu.com/ubuntu jammy-updates/universe Translation-en [327 kB]
+    bastion: Get:27 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 c-n-f Metadata [30.8 kB]
+    bastion: Get:28 http://archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 Packages [86.1 kB]
+    bastion: Get:29 http://archive.ubuntu.com/ubuntu jammy-updates/multiverse Translation-en [16.5 kB]
+    bastion: Get:30 http://archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 c-n-f Metadata [756 B]
+    bastion: Get:31 http://archive.ubuntu.com/ubuntu jammy-backports/main amd64 Packages [70.2 kB]
+    bastion: Get:32 http://archive.ubuntu.com/ubuntu jammy-backports/main Translation-en [11.4 kB]
+    bastion: Get:33 http://archive.ubuntu.com/ubuntu jammy-backports/main amd64 c-n-f Metadata [412 B]
+    bastion: Get:34 http://archive.ubuntu.com/ubuntu jammy-backports/restricted amd64 c-n-f Metadata [116 B]
+    bastion: Get:35 http://archive.ubuntu.com/ubuntu jammy-backports/universe amd64 Packages [30.8 kB]
+    bastion: Get:36 http://archive.ubuntu.com/ubuntu jammy-backports/universe Translation-en [16.9 kB]
+    bastion: Get:37 http://archive.ubuntu.com/ubuntu jammy-backports/universe amd64 c-n-f Metadata [676 B]
+    bastion: Get:38 http://archive.ubuntu.com/ubuntu jammy-backports/multiverse amd64 c-n-f Metadata [116 B]
+    bastion: Fetched 48.8 MB in 26s (1881 kB/s)
+    bastion: Reading package lists...
+    bastion: Reading package lists...
+    bastion: Building dependency tree...
+    bastion: Reading state information...
+    bastion: software-properties-common is already the newest version (0.99.22.9).
+    bastion: software-properties-common set to manually installed.
+    bastion: 0 upgraded, 0 newly installed, 0 to remove and 126 not upgraded.
+    bastion: Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+    bastion: Hit:2 http://security.ubuntu.com/ubuntu jammy-security InRelease
+    bastion: Hit:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
+    bastion: Get:4 https://ppa.launchpadcontent.net/ansible/ansible/ubuntu jammy InRelease [18.0 kB]
+    bastion: Hit:5 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
+    bastion: Get:6 https://ppa.launchpadcontent.net/ansible/ansible/ubuntu jammy/main amd64 Packages [1124 B]
+    bastion: Get:7 https://ppa.launchpadcontent.net/ansible/ansible/ubuntu jammy/main Translation-en [752 B]
+    bastion: Fetched 19.9 kB in 2s (11.8 kB/s)
+    bastion: Reading package lists...
+    bastion: Repository: 'deb https://ppa.launchpadcontent.net/ansible/ansible/ubuntu/ jammy main'
+    bastion: Description:
+    bastion: Ansible is a radically simple IT automation platform that makes your applications and systems easier to deploy. Avoid writing scripts or custom code to deploy and update your applications— automate in a language that approaches plain English, using SSH, with no agents to install on remote systems.
+    bastion: 
+    bastion: http://ansible.com/
+    bastion: 
+    bastion: If you face any issues while installing Ansible PPA, file an issue here:
+    bastion: https://github.com/ansible-community/ppa/issues
+    bastion: More info: https://launchpad.net/~ansible/+archive/ubuntu/ansible
+    bastion: Adding repository.
+    bastion: Adding deb entry to /etc/apt/sources.list.d/ansible-ubuntu-ansible-jammy.list
+    bastion: Adding disabled deb-src entry to /etc/apt/sources.list.d/ansible-ubuntu-ansible-jammy.list
+    bastion: Adding key to /etc/apt/trusted.gpg.d/ansible-ubuntu-ansible.gpg with fingerprint 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367
+    bastion: Reading package lists...
+    bastion: Building dependency tree...
+    bastion: Reading state information...
+    bastion: The following additional packages will be installed:
+    bastion:   ansible-core python3-jmespath python3-kerberos python3-nacl
+    bastion:   python3-ntlm-auth python3-paramiko python3-requests-kerberos
+    bastion:   python3-requests-ntlm python3-resolvelib python3-winrm python3-xmltodict
+    bastion:   sshpass
+    bastion: Suggested packages:
+    bastion:   python-nacl-doc python3-gssapi python3-invoke
+    bastion: The following NEW packages will be installed:
+    bastion:   ansible ansible-core python3-jmespath python3-kerberos python3-nacl
+    bastion:   python3-ntlm-auth python3-paramiko python3-requests-kerberos
+    bastion:   python3-requests-ntlm python3-resolvelib python3-winrm python3-xmltodict
+    bastion:   sshpass
+    bastion: 0 upgraded, 13 newly installed, 0 to remove and 126 not upgraded.
+    bastion: Need to get 19.2 MB of archives.
+    bastion: After this operation, 213 MB of additional disk space will be used.
+    bastion: Get:1 http://archive.ubuntu.com/ubuntu jammy/universe amd64 python3-resolvelib all 0.8.1-1 [23.6 kB]
+    bastion: Get:2 https://ppa.launchpadcontent.net/ansible/ansible/ubuntu jammy/main amd64 ansible-core all 2.17.14-1ppa~jammy [1017 kB]
+    bastion: Get:3 http://archive.ubuntu.com/ubuntu jammy/main amd64 python3-jmespath all 0.10.0-1 [21.7 kB]
+    bastion: Get:4 http://archive.ubuntu.com/ubuntu jammy/universe amd64 python3-kerberos amd64 1.1.14-3.1build5 [23.0 kB]
+    bastion: Get:5 http://archive.ubuntu.com/ubuntu jammy/main amd64 python3-nacl amd64 1.5.0-2 [63.1 kB]
+    bastion: Get:6 http://archive.ubuntu.com/ubuntu jammy/universe amd64 python3-ntlm-auth all 1.4.0-1 [20.4 kB]
+    bastion: Get:7 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 python3-paramiko all 2.9.3-0ubuntu1.3 [134 kB]
+    bastion: Get:8 http://archive.ubuntu.com/ubuntu jammy/universe amd64 python3-requests-kerberos all 0.12.0-2 [11.9 kB]
+    bastion: Get:9 http://archive.ubuntu.com/ubuntu jammy/universe amd64 python3-requests-ntlm all 1.1.0-1.1 [6160 B]
+    bastion: Get:10 http://archive.ubuntu.com/ubuntu jammy/universe amd64 python3-xmltodict all 0.12.0-2 [12.6 kB]
+    bastion: Get:11 http://archive.ubuntu.com/ubuntu jammy/universe amd64 python3-winrm all 0.3.0-2 [21.7 kB]
+    bastion: Get:12 http://archive.ubuntu.com/ubuntu jammy/universe amd64 sshpass amd64 1.09-1 [11.7 kB]
+    bastion: Get:13 https://ppa.launchpadcontent.net/ansible/ansible/ubuntu jammy/main amd64 ansible all 10.7.0-1ppa~jammy [17.9 MB]
+    bastion: dpkg-preconfigure: unable to re-open stdin: No such file or directory
+    bastion: Fetched 19.2 MB in 6s (3332 kB/s)
+    bastion: Selecting previously unselected package python3-resolvelib.
+    bastion: (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 64288 files and directories currently installed.)
+    bastion: Preparing to unpack .../00-python3-resolvelib_0.8.1-1_all.deb ...
+    bastion: Unpacking python3-resolvelib (0.8.1-1) ...
+    bastion: Selecting previously unselected package ansible-core.
+    bastion: Preparing to unpack .../01-ansible-core_2.17.14-1ppa~jammy_all.deb ...
+    bastion: Unpacking ansible-core (2.17.14-1ppa~jammy) ...
+    bastion: Selecting previously unselected package ansible.
+    bastion: Preparing to unpack .../02-ansible_10.7.0-1ppa~jammy_all.deb ...
+    bastion: Unpacking ansible (10.7.0-1ppa~jammy) ...
+    bastion: Selecting previously unselected package python3-jmespath.
+    bastion: Preparing to unpack .../03-python3-jmespath_0.10.0-1_all.deb ...
+    bastion: Unpacking python3-jmespath (0.10.0-1) ...
+    bastion: Selecting previously unselected package python3-kerberos.
+    bastion: Preparing to unpack .../04-python3-kerberos_1.1.14-3.1build5_amd64.deb ...
+    bastion: Unpacking python3-kerberos (1.1.14-3.1build5) ...
+    bastion: Selecting previously unselected package python3-nacl.
+    bastion: Preparing to unpack .../05-python3-nacl_1.5.0-2_amd64.deb ...
+    bastion: Unpacking python3-nacl (1.5.0-2) ...
+    bastion: Selecting previously unselected package python3-ntlm-auth.
+    bastion: Preparing to unpack .../06-python3-ntlm-auth_1.4.0-1_all.deb ...
+    bastion: Unpacking python3-ntlm-auth (1.4.0-1) ...
+    bastion: Selecting previously unselected package python3-paramiko.
+    bastion: Preparing to unpack .../07-python3-paramiko_2.9.3-0ubuntu1.3_all.deb ...
+    bastion: Unpacking python3-paramiko (2.9.3-0ubuntu1.3) ...
+    bastion: Selecting previously unselected package python3-requests-kerberos.
+    bastion: Preparing to unpack .../08-python3-requests-kerberos_0.12.0-2_all.deb ...
+    bastion: Unpacking python3-requests-kerberos (0.12.0-2) ...
+    bastion: Selecting previously unselected package python3-requests-ntlm.
+    bastion: Preparing to unpack .../09-python3-requests-ntlm_1.1.0-1.1_all.deb ...
+    bastion: Unpacking python3-requests-ntlm (1.1.0-1.1) ...
+    bastion: Selecting previously unselected package python3-xmltodict.
+    bastion: Preparing to unpack .../10-python3-xmltodict_0.12.0-2_all.deb ...
+    bastion: Unpacking python3-xmltodict (0.12.0-2) ...
+    bastion: Selecting previously unselected package python3-winrm.
+    bastion: Preparing to unpack .../11-python3-winrm_0.3.0-2_all.deb ...
+    bastion: Unpacking python3-winrm (0.3.0-2) ...
+    bastion: Selecting previously unselected package sshpass.
+    bastion: Preparing to unpack .../12-sshpass_1.09-1_amd64.deb ...
+    bastion: Unpacking sshpass (1.09-1) ...
+    bastion: Setting up python3-ntlm-auth (1.4.0-1) ...
+    bastion: Setting up python3-resolvelib (0.8.1-1) ...
+    bastion: Setting up python3-kerberos (1.1.14-3.1build5) ...
+    bastion: Setting up ansible-core (2.17.14-1ppa~jammy) ...
+    bastion: Setting up sshpass (1.09-1) ...
+    bastion: Setting up python3-xmltodict (0.12.0-2) ...
+    bastion: Setting up python3-jmespath (0.10.0-1) ...
+    bastion: Setting up python3-requests-kerberos (0.12.0-2) ...
+    bastion: Setting up ansible (10.7.0-1ppa~jammy) ...
+    bastion: Setting up python3-nacl (1.5.0-2) ...
+    bastion: Setting up python3-requests-ntlm (1.1.0-1.1) ...
+    bastion: Setting up python3-winrm (0.3.0-2) ...
+    bastion: Setting up python3-paramiko (2.9.3-0ubuntu1.3) ...
+    bastion: Processing triggers for man-db (2.10.2-1) ...
+    bastion: 
+    bastion: Running kernel seems to be up-to-date.
+    bastion: 
+    bastion: No services need to be restarted.
+    bastion: 
+    bastion: No containers need to be restarted.
+    bastion: 
+    bastion: No user sessions are running outdated binaries.
+    bastion: 
+    bastion: No VM guests are running outdated hypervisor (qemu) binaries on this host.
+==> bastion: Running provisioner: ansible_local...
+    bastion: Running ansible-playbook...
+
+PLAY [Base comum, /etc/hosts e firewall] ***************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [auxiliary]
+ok: [k3s-worker]
+ok: [bastion]
+ok: [k3s-server]
+
+TASK [common : Atualiza o cache do apt] ****************************************
+ok: [bastion]
+changed: [k3s-server]
+changed: [auxiliary]
+changed: [k3s-worker]
+
+TASK [common : Instala utilitarios de diagnostico] *****************************
+changed: [k3s-server]
+changed: [auxiliary]
+changed: [bastion]
+changed: [k3s-worker]
+
+TASK [common : Define o fuso horario] ******************************************
+changed: [k3s-server]
+changed: [k3s-worker]
+changed: [auxiliary]
+changed: [bastion]
+
+TASK [common : Mapeia todos os nos e o VIP no /etc/hosts] **********************
+changed: [k3s-worker]
+[WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created
+with a mode of 0700, this may cause issues when running as another user. To
+avoid this, create the remote_tmp dir with the correct permissions manually
+changed: [auxiliary]
+changed: [k3s-server]
+changed: [bastion]
+
+TASK [common : Habilita o encaminhamento IPv4 (exigido pelo K3s e pelo VRRP)] ***
+changed: [k3s-server]
+changed: [k3s-worker]
+changed: [auxiliary]
+changed: [bastion]
+
+TASK [common : Firewall - nega entrada por padrao] *****************************
+ok: [k3s-server]
+ok: [k3s-worker]
+ok: [auxiliary]
+ok: [bastion]
+
+TASK [common : Firewall - libera saida] ****************************************
+ok: [k3s-server]
+ok: [auxiliary]
+ok: [k3s-worker]
+ok: [bastion]
+
+TASK [common : Firewall - trafego roteado (pods/flannel nos nos K3s, nega nos demais)] ***
+ok: [auxiliary]
+ok: [k3s-server]
+ok: [k3s-worker]
+ok: [bastion]
+
+TASK [common : Firewall - SSH] *************************************************
+changed: [bastion]
+changed: [k3s-server]
+changed: [k3s-worker]
+changed: [auxiliary]
+
+TASK [common : Firewall - HTTP nos proxies] ************************************
+skipping: [k3s-server]
+skipping: [k3s-worker]
+changed: [bastion]
+changed: [auxiliary]
+
+TASK [common : Firewall - VRRP (protocolo 112) vindo do outro proxy] ***********
+skipping: [k3s-server]
+skipping: [k3s-worker]
+changed: [auxiliary]
+changed: [bastion]
+
+TASK [common : Firewall - comunicacao irrestrita entre os nos do cluster e redes de pods/servicos] ***
+skipping: [bastion] => (item=192.168.56.20) 
+skipping: [bastion] => (item=192.168.56.30) 
+skipping: [bastion] => (item=10.42.0.0/16) 
+skipping: [bastion] => (item=10.43.0.0/16) 
+skipping: [bastion]
+skipping: [auxiliary] => (item=192.168.56.20) 
+skipping: [auxiliary] => (item=192.168.56.30) 
+skipping: [auxiliary] => (item=10.42.0.0/16) 
+skipping: [auxiliary] => (item=10.43.0.0/16) 
+skipping: [auxiliary]
+changed: [k3s-server] => (item=192.168.56.20)
+changed: [k3s-worker] => (item=192.168.56.20)
+changed: [k3s-server] => (item=192.168.56.30)
+changed: [k3s-worker] => (item=192.168.56.30)
+changed: [k3s-server] => (item=10.42.0.0/16)
+changed: [k3s-worker] => (item=10.42.0.0/16)
+changed: [k3s-server] => (item=10.43.0.0/16)
+changed: [k3s-worker] => (item=10.43.0.0/16)
+
+TASK [common : Firewall - API do Kubernetes para o bastion (kubectl)] **********
+skipping: [bastion]
+skipping: [auxiliary]
+skipping: [k3s-worker]
+changed: [k3s-server]
+
+TASK [common : Firewall - NodePort 30080 para os proxies] **********************
+skipping: [bastion] => (item=bastion) 
+skipping: [bastion] => (item=auxiliary) 
+skipping: [bastion]
+skipping: [auxiliary] => (item=bastion) 
+skipping: [auxiliary] => (item=auxiliary) 
+skipping: [auxiliary]
+changed: [k3s-worker] => (item=bastion)
+changed: [k3s-server] => (item=bastion)
+changed: [k3s-worker] => (item=auxiliary)
+changed: [k3s-server] => (item=auxiliary)
+
+TASK [common : Firewall - ativa (e habilita no boot)] **************************
+changed: [auxiliary]
+changed: [bastion]
+Terminated
+Ansible failed to complete successfully. Any error output should be
+visible above. Please fix these errors and try again.
+EXIT=1

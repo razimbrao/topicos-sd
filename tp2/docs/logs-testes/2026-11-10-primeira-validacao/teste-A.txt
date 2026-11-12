@@ -1,0 +1,10 @@
+13:20:36 proxy=bastion {"db":"ok","env":"production","node":"k3s-server","pod":"tp2-api-7598cc9988-8nn9f","records":0,"time":"2026-11-10T16:20:36Z"}
+13:20:36 proxy=bastion {"db":"ok","env":"production","node":"k3s-server","pod":"tp2-api-7598cc9988-8nn9f","records":0,"time":"2026-11-10T16:20:37Z"}
+13:20:37 proxy=bastion {"db":"ok","env":"production","node":"k3s-worker","pod":"tp2-api-7598cc9988-cdk5c","records":0,"time":"2026-11-10T16:20:37Z"}
+13:20:38 proxy=bastion {"db":"ok","env":"production","node":"k3s-server","pod":"tp2-api-7598cc9988-8nn9f","records":0,"time":"2026-11-10T16:20:38Z"}
+13:20:38 proxy=bastion {"db":"ok","env":"production","node":"k3s-server","pod":"tp2-api-7598cc9988-8nn9f","records":0,"time":"2026-11-10T16:20:39Z"}
+13:20:39 proxy=bastion {"db":"ok","env":"production","node":"k3s-server","pod":"tp2-api-7598cc9988-8nn9f","records":0,"time":"2026-11-10T16:20:39Z"}
+13:20:40 proxy=bastion {"db":"ok","env":"production","node":"k3s-worker","pod":"tp2-api-7598cc9988-cdk5c","records":0,"time":"2026-11-10T16:20:40Z"}
+13:20:41 proxy=bastion {"db":"ok","env":"production","node":"k3s-worker","pod":"tp2-api-7598cc9988-cdk5c","records":0,"time":"2026-11-10T16:20:41Z"}
+13:20:41 proxy=bastion {"db":"ok","env":"production","node":"k3s-worker","pod":"tp2-api-7598cc9988-cdk5c","records":0,"time":"2026-11-10T16:20:41Z"}
+13:20:42 proxy=bastion {"db":"ok","env":"production","node":"k3s-server","pod":"tp2-api-7598cc9988-8nn9f","records":0,"time":"2026-11-10T16:20:42Z"}

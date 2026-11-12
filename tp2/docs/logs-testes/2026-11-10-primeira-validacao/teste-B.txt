@@ -1,0 +1,57 @@
+13:22:33.911 HTTP=200 proxy=bastion
+13:22:34.403 HTTP=200 proxy=bastion
+13:22:34.922 HTTP=200 proxy=bastion
+13:22:35.412 HTTP=200 proxy=bastion
+13:22:35.906 HTTP=200 proxy=bastion
+13:22:36.396 HTTP=200 proxy=bastion
+13:22:36.888 HTTP=200 proxy=bastion
+13:22:37.381 HTTP=200 proxy=bastion
+13:22:37.873 HTTP=200 proxy=bastion
+13:22:38.366 HTTP=200 proxy=bastion
+>>> 13:22:38.782 parando nginx no bastion
+13:22:38.857 HTTP=200 proxy=bastion
+13:22:39.351 HTTP=200 proxy=bastion
+13:22:39.849 HTTP=200 proxy=bastion
+13:22:40.349 HTTP=200 proxy=bastion
+13:22:40.849 HTTP=200 proxy=bastion
+13:22:41.353 HTTP=200 proxy=bastion
+13:22:41.849 HTTP=200 proxy=bastion
+13:22:42.347 HTTP=200 proxy=bastion
+13:22:42.844 HTTP=200 proxy=bastion
+13:22:43.347 HTTP=200 proxy=bastion
+13:22:44.838 HTTP=000 proxy=-
+13:22:45.329 HTTP=200 proxy=auxiliary
+13:22:45.818 HTTP=200 proxy=auxiliary
+13:22:46.307 HTTP=200 proxy=auxiliary
+13:22:46.797 HTTP=200 proxy=auxiliary
+13:22:47.288 HTTP=200 proxy=auxiliary
+13:22:47.778 HTTP=200 proxy=auxiliary
+13:22:48.267 HTTP=200 proxy=auxiliary
+13:22:48.761 HTTP=200 proxy=auxiliary
+13:22:49.252 HTTP=200 proxy=auxiliary
+13:22:49.744 HTTP=200 proxy=auxiliary
+13:22:50.239 HTTP=200 proxy=auxiliary
+13:22:50.726 HTTP=200 proxy=auxiliary
+13:22:51.217 HTTP=200 proxy=auxiliary
+>>> VIP na VM 4:
+13:22:51.709 HTTP=200 proxy=auxiliary
+13:22:52.211 HTTP=200 proxy=auxiliary
+13:22:52.705 HTTP=200 proxy=auxiliary
+13:22:53.202 HTTP=200 proxy=auxiliary
+13:22:53.723 HTTP=200 proxy=auxiliary
+13:22:54.222 HTTP=200 proxy=auxiliary
+13:22:54.732 HTTP=200 proxy=auxiliary
+13:22:55.232 HTTP=200 proxy=auxiliary
+13:22:55.730 HTTP=200 proxy=auxiliary
+    inet 192.168.56.254/24 scope global secondary enp0s8
+13:22:56.226 HTTP=200 proxy=auxiliary
+13:22:56.714 HTTP=200 proxy=auxiliary
+13:22:57.209 HTTP=200 proxy=auxiliary
+13:22:57.700 HTTP=200 proxy=auxiliary
+>>> 13:22:59.927 religando nginx no bastion (VIP volta ao MASTER)
+
+Falhas durante o teste: 1
+Respostas por proxy:
+      1 proxy=-
+     26 proxy=auxiliary
+     20 proxy=bastion

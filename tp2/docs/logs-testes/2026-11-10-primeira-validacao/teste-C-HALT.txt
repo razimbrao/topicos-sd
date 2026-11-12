@@ -1,0 +1,19 @@
+>>> gravando: registro-teste-c-1794328056
+{"id":3,"message":"registro-teste-c-1794328056","pod":"tp2-api-7598cc9988-cdk5c","created_at":"2026-11-10T16:27:36.311798Z"}
+==> bastion: Attempting graceful shutdown of VM...
+==> auxiliary: Attempting graceful shutdown of VM...
+==> k3s-worker: Attempting graceful shutdown of VM...
+==> k3s-server: Attempting graceful shutdown of VM...
+==> k3s-server: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+==> k3s-worker: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+==> auxiliary: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+>>> API respondendo pelo VIP 108s apos o inicio da retomada
+==> bastion: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+>>> comando vagrant concluido em 144s
+{"db":"ok","env":"production","node":"k3s-worker","pod":"tp2-api-7598cc9988-cdk5c","records":3,"time":"2026-11-10T16:30:34Z"}
+OK: registro 'registro-teste-c-1794328056' preservado
+NAME                        READY   STATUS    RESTARTS       AGE    IP           NODE         NOMINATED NODE   READINESS GATES
+postgres-674c8fc76d-xlvpg   1/1     Running   1 (79s ago)    12m    10.42.1.9    k3s-worker   <none>           <none>
+tp2-api-7598cc9988-cdk5c    1/1     Running   1 (79s ago)    12m    10.42.1.10   k3s-worker   <none>           <none>
+tp2-api-7598cc9988-ddf8z    1/1     Running   1 (112s ago)   7m4s   10.42.0.12   k3s-server   <none>           <none>
+    inet 192.168.56.254/24 scope global secondary enp0s8
